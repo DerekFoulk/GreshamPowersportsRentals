@@ -10,20 +10,44 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet" />
     <link href="_content/Blazor.Bootstrap/blazor.bootstrap.css" rel="stylesheet" />
     <link href="_content/Blazor.Bootstrap/Blazor.Bootstrap.bundle.scp.css" rel="stylesheet" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alumni+Sans:wght@400;800&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet">
+
     <link href="css/app.css" rel="stylesheet" />
     <link href="Client.styles.css" rel="stylesheet" />
 </head>
 
 <body>
-<div id="app">
-    <div class="splash-screen position-relative">
-        <div class="splash-screen-overlay position-absolute w-100">
-            <div class="position-absolute top-50 start-50 translate-middle">
-                <img class="img-fluid" src="images/logo.png" alt="Gresham Powersports Logo" />
+    <div id="app">
+        <div class="splash-screen position-relative">
+            <div class="splash-screen-placeholders position-absolute top-0 start-0 w-100">
+                <div class="container-fluid">
+                    <div class="placeholder-wave mt-1 mb-3">
+                        <span class="placeholder col-2 placeholder-lg"></span>
+                    </div>
+                    <div class="placeholder-wave mb-3">
+                        <span class="placeholder col-2 placeholder-lg"></span>
+                        <span class="placeholder col-4 placeholder-lg"></span>
+                        <span class="placeholder col-4 placeholder-lg"></span>
+                    </div>
+                    <div class="placeholder-wave mb-3">
+                        <span class="placeholder col-2 placeholder-lg"></span>
+                        <span class="placeholder col-4 placeholder-lg"></span>
+                        <span class="placeholder col-4 placeholder-lg"></span>
+                    </div>
+                    <a class="btn btn-success disabled placeholder col-1 float-end" aria-disabled="true"></a>
+                </div>
+            </div>
+
+            <div class="splash-screen-overlay position-absolute">
+                <div class="position-absolute top-50 start-50 translate-middle">
+                    <img class="img-fluid" src="images/logo.png" alt="Gresham Powersports Logo" />
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.

@@ -1,0 +1,41 @@
+﻿@using BlazorApp.Shared
+
+@inject HttpClient Http
+
+@inject ILogger<BikeSelector> Logger
+
+<div class="row g-3">
+    @foreach (var bike in _bikes)
+    {
+        <div class="col-12">
+            <BikeDetails Bike="@bike" />
+        </div>
+    }
+</div>
+
+@code {
+    private Bike[] _bikes = { };
+
+    [Parameter]
+    [EditorRequired]
+    public Category? Category { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            var allBikes = await Http.GetFromJsonAsync<Bike[]>("/api/Bikes") ?? new Bike[] { };
+
+            var filteredBikes = allBikes
+                .Where(x => x.Category?.Id.Equals(Category?.Id) == true)
+                .ToArray();
+
+            _bikes = filteredBikes;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to load bikes");
+        }
+    }
+
+}

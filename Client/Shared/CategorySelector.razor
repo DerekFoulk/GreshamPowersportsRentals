@@ -1,0 +1,45 @@
+﻿@using BlazorApp.Shared
+@using System.Collections.ObjectModel
+
+@inject HttpClient Http
+
+<div class="row g-3 mb-3">
+    <div class="col-md-2">Choose a category to see the available models</div>
+
+    @foreach (var category in _categories)
+    {
+        <div class="col-md-2">
+            <CategorySelectorButton Category="category"
+                                    IsActive="@(category == SelectedCategory)"
+                                    OnClickCallback="() => OnCategorySelectorButtonClicked(category)"/>
+        </div>
+    }
+</div>
+
+<BikeSelector Category="@SelectedCategory" />
+
+@code {
+    private Category[] _categories = { };
+
+    protected Category? SelectedCategory { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _categories = await Http.GetFromJsonAsync<Category[]>("/api/Categories") ?? new Category[] { };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+    }
+
+    private void OnCategorySelectorButtonClicked(Category category)
+    {
+        if (SelectedCategory == category)
+            return;
+
+        SelectedCategory = category;
+    }
+}

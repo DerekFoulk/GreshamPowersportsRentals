@@ -1,0 +1,14 @@
+﻿a {
+    text-decoration: none;
+}
+
+a:hover img {
+    opacity: 0.66666667;
+}
+
+.card-img-bg {
+    height: 150px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+}
