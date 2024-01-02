@@ -1,0 +1,38 @@
+﻿@using BlazorApp.Shared
+
+@if (Category is null)
+{
+    <Spinner />
+}
+else
+{
+    <a href="#" class="link-body-emphasis link-offset-2 link-underline-opacity-25 link-underline-opacity-75-hover h-100" @onclick="OnClickCallback">
+        <div class="card @CardClass h-100 text-center">
+            @* <img src="@Category.Image" class="card-img-top" alt="@Category.Name"> *@
+            <div class="card-img-bg h-100" style="background-image: url(@Category.Image);"></div>
+            <div class="card-header">
+                @Category.Name
+            </div>
+        </div>
+    </a>
+}
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public Category? Category { get; set; }
+
+    [Parameter]
+    public bool IsActive { get; set; }
+
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnClickCallback { get; set; }
+
+    protected string? CardClass { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        CardClass = IsActive ? "text-bg-primary" : "text-bg-dark";
+    }
+
+}

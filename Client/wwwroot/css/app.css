@@ -1,34 +1,23 @@
-﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+:root {
+    --bs-primary: #7EC243;
+    --bs-primary-rgb: 127, 194, 68;
+}
 
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Noto Sans', sans-serif;
 }
 
 h1:focus {
     outline: none;
 }
 
-a, .btn-link {
-    color: #0077cc;
-}
-
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
-}
-
-.content {
-    padding-top: 1.1rem;
-}
-
-.valid.modified:not([type=checkbox]) {
+/*.valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }
 
 .invalid {
     outline: 1px solid red;
-}
+}*/
 
 .validation-message {
     color: red;
@@ -62,3 +51,98 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+    font-family: 'Alumni Sans', sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+@-webkit-keyframes splashScreenPlaceholdersFade {
+    0%, 33% {
+        opacity: 0;
+    }
+
+    66%, 100% {
+        opacity: 1;
+    }
+}
+
+@keyframes splashScreenPlaceholdersFade {
+    0%, 33% {
+        opacity: 0;
+    }
+
+    66%, 100% {
+        opacity: 1;
+    }
+}
+
+@-webkit-keyframes splashScreenFade {
+    0% {
+        opacity: 0;
+    }
+
+    33%, 66% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes splashScreenFade {
+    0% {
+        opacity: 0;
+    }
+
+    33%, 66% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+html,
+body,
+#app,
+.splash-screen,
+.splash-screen-overlay {
+    width: 100%;
+    height: 100%;
+}
+
+.splash-screen-overlay {
+    background-color: #222222;
+    -webkit-animation: splashScreenFade 5s linear forwards;
+    animation: splashScreenFade 5s linear forwards;
+}
+
+.splash-screen-placeholders {
+    -webkit-animation: splashScreenPlaceholdersFade 5s linear forwards;
+    animation: splashScreenPlaceholdersFade 5s linear forwards;
+}
+
+/* Fix an issue with Blazor.Bootstrap */
+article {
+    padding: 0 !important;
+}
+
+/* Fix a failed override of primary color */
+.text-bg-primary {
+    background-color: var(--bs-primary) !important;
+}

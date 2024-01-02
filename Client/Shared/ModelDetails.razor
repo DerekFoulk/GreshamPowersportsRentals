@@ -1,0 +1,139 @@
+﻿@using BlazorApp.Shared
+@using System.Web
+@using BlazorApp.Shared.Extensions
+
+@if (Model is null)
+{
+    <Spinner />
+}
+else
+{
+    <Card>
+        <CardHeader>@Model.Name</CardHeader>
+        <CardBody>
+            <div class="row g-3">
+                <div class="col-md-6 col-xl-8">
+                    <Tabs>
+                        <Tab Title="Summary"
+                             IsActive="true">
+                            <Content>
+                                <div class="p-3">
+                                    <img class="product-image float-start me-3 mb-3" src="https://placehold.co/350x250?text=@(HttpUtility.UrlEncode(Model.Name))" alt="@Model.Name"/>
+                                    @DescriptionMarkupString
+                                </div>
+                            </Content>
+                        </Tab>
+                        <Tab Title="Info">
+                            <Content>
+                                <div class="p-3">
+                                    <p>More details can be found at <a href="https://www.specialized.com/us/en/rockhopper-expert/p/199626?color=319772-199626" target="_blank">https://www.specialized.com/us/en/rockhopper-expert/p/199626?color=319772-199626</a>.</p>
+                                </div>
+                            </Content>
+                        </Tab>
+                    </Tabs>
+                </div>
+                <div class="col-sm-6 col-md-3 col-xl-2">
+                    <ul class="list-group">
+                        <li class="list-group-item text-center text-bg-dark">
+                            <span class="h3 align-middle">Extras</span>
+                        </li>
+                        <li class="list-group-item">
+                            <input class="form-check-input me-1" type="checkbox" value="" id="firstCheckboxStretched">
+                            <label class="form-check-label stretched-link" for="firstCheckboxStretched">Helmet</label>
+                            <span class="text-success fw-bolder float-end">$0.00</span>
+                        </li>
+                        <li class="list-group-item">
+                            <input class="form-check-input me-1" type="checkbox" value="" id="secondCheckboxStretched">
+                            <label class="form-check-label stretched-link" for="secondCheckboxStretched">Lock</label>
+                            <span class="text-success fw-bolder float-end">$0.00</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-sm-6 col-md-3 col-xl-2 text-center">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <span class="h1 d-block">@Price?.ToString("C")</span>
+                            <small class="text-muted d-block"><em>@(Model.PricePerHour.ToString("C"))/hr</em></small>
+                        </div>
+                        <div class="col-12">
+                            <CascadingValue Value="Model">
+                                <SizeSelector />
+                            </CascadingValue>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </CardBody>
+        </Card>
+}
+
+@code {
+    [Inject]
+    ILogger<ModelDetails>? Logger { get; set; }
+
+    [CascadingParameter]
+    [EditorRequired]
+    public Rental? Rental { get; set; }
+
+    [Parameter]
+    [EditorRequired]
+    public Model? Model { get; set; }
+
+    protected MarkupString DescriptionMarkupString { get; set; }
+
+    protected decimal? Price { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Model?.Description != null)
+            DescriptionMarkupString = new MarkupString(Model.Description);
+    }
+
+    protected override void OnParametersSet()
+    {
+        Price = CalculatePrice();
+    }
+
+    private decimal? CalculatePrice()
+    {
+        Logger?.LogDebug("Calculating price");
+
+        if (Model is null)
+        {
+            var exception = new InvalidOperationException($"'{nameof(Model)}' must not be null");
+            
+            Logger?.LogError(exception, "Cannot calculate price");
+
+            throw exception;
+        }
+
+        if (Rental is null)
+        {
+            var exception = new InvalidOperationException($"'{nameof(Rental)}' must not be null");
+
+            Logger?.LogError(exception, "Cannot calculate price");
+
+            throw exception;
+        }
+
+        var rentalStart = Rental.StartDate.ToDateTime(Rental.StartTime);
+        var rentalEnd = Rental.EndDate.ToDateTime(Rental.EndTime);
+
+        Logger?.LogDebug($"Rental Start: {rentalStart}");
+        Logger?.LogDebug($"Rental End: {rentalEnd}");
+
+        var duration = rentalEnd - rentalStart;
+
+        Logger?.LogDebug($"Duration: {duration}");
+
+        var hours = (decimal)duration.TotalHours;
+        var price = hours * Model.PricePerHour;
+
+        Logger?.LogDebug($"Bike Price per Hour: {Model.PricePerHour:C}");
+
+        Logger?.LogDebug($"Price: {price:C}");
+
+        return price;
+    }
+
+}

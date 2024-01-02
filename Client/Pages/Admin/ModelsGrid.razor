@@ -1,0 +1,55 @@
+﻿@inject HttpClient Http
+
+<Grid TItem="Model" class="table table-hover table-bordered table-striped"
+      DataProvider="ModelsDataProviderAsync"
+      Responsive="true">
+    <GridColumn TItem="Model" HeaderText="Id" PropertyName="Id">
+        <span class="d-inline-block text-truncate" style="max-width: 90px;">
+            @context.Id
+        </span>
+    </GridColumn>
+    <GridColumn TItem="Model" HeaderText="Manufacturer" PropertyName="Manufacturer">
+        @context.Manufacturer.Name
+    </GridColumn>
+    <GridColumn TItem="Model" HeaderText="Model" PropertyName="Name">
+        @context.Name
+    </GridColumn>
+    <GridColumn TItem="Model" HeaderText="Type" PropertyName="Type">
+        @context.Type
+    </GridColumn>
+    <GridColumn TItem="Model" HeaderText="Category" PropertyName="Category">
+        @context.Category.Name
+    </GridColumn>
+    <GridColumn TItem="Model" HeaderText="Description" PropertyName="Description">
+        <span class="d-inline-block text-truncate" style="max-width: 250px;">
+            @context.Description
+        </span>
+    </GridColumn>
+    <GridColumn TItem="Model" HeaderText="Price (per hour)" PropertyName="PricePerHour">
+        @context.PricePerHour.ToString("C")
+    </GridColumn>
+    <GridColumn TItem="Model" HeaderText="Price (per day)" PropertyName="PricePerDay">
+        @context.PricePerDay.ToString("C")
+    </GridColumn>
+</Grid>
+
+@code {
+    protected IEnumerable<Model>? Models { get; set; }
+
+    private async Task<GridDataProviderResult<Model>> ModelsDataProviderAsync(GridDataProviderRequest<Model> request)
+    {
+        Models ??= await GetModelsAsync();
+
+        return await Task.FromResult(request.ApplyTo(Models));
+    }
+
+    private async Task<IOrderedEnumerable<Model>> GetModelsAsync()
+    {
+        var models = await Http.GetFromJsonAsync<Model[]>("/api/Models") ?? new Model[] { };
+        var sorted = models
+            .OrderBy(x => x.Manufacturer.Name)
+            .ThenBy(x => x.Name);
+
+        return sorted;
+    }
+}

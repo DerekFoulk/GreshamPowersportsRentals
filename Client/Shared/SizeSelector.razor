@@ -1,0 +1,46 @@
+﻿
+@if (AvailableSizes is null)
+{
+    <Spinner />
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var size in AvailableSizes)
+        {
+            <div class="col-12">
+                <SizeQtySelector Size="size" />
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [CascadingParameter]
+    [EditorRequired]
+    public Model? Model { get; set; }
+
+    protected IEnumerable<BikeSize>? AvailableSizes { get; set; }
+
+    protected override void OnInitialized()
+    {
+        AvailableSizes = GetAvailableSizes();
+    }
+
+    private IEnumerable<BikeSize>? GetAvailableSizes()
+    {
+        if (Model is null)
+            return null;
+
+        var sizes = Enum.GetValues<BikeSize>();
+
+        var availableSizes = Model.Bikes
+            .Select(x => x.Size)
+            .Distinct();
+
+        var sorted = availableSizes.OrderBy(s => Array.IndexOf(sizes, s))
+            .ThenBy(s => s);
+
+        return sorted;
+    }
+}
