@@ -6,10 +6,10 @@
 }
 else
 {
-    <a href="#" class="link-body-emphasis link-offset-2 link-underline-opacity-25 link-underline-opacity-75-hover" @onclick="OnClickCallback">
-        <div class="card @CardClass text-center">
+    <a href="#" class="link-body-emphasis link-offset-2 link-underline-opacity-25 link-underline-opacity-75-hover h-100" @onclick="OnClickCallback">
+        <div class="card @CardClass h-100 text-center">
             @* <img src="@Category.Image" class="card-img-top" alt="@Category.Name"> *@
-            <div class="card-img-bg" style="background-image: url(@Category.Image);"></div>
+            <div class="card-img-bg h-100" style="background-image: url(@Category.Image);"></div>
             <div class="card-header">
                 @Category.Name
             </div>

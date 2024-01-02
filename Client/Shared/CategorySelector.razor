@@ -1,17 +1,22 @@
 ﻿@using BlazorApp.Shared
-@using System.Collections.ObjectModel
 
 @inject HttpClient Http
 
 <div class="row g-3 mb-3">
-    <div class="col-md-2">Choose a category to see the available models</div>
+    <div class="col-md-2">
+        <Card Color="CardColor.Primary">
+            <CardBody Class="py-md-5">
+                <strong>Choose a category to see the available models</strong>
+            </CardBody>
+        </Card>
+    </div>
 
     @foreach (var category in _categories)
     {
         <div class="col-md-2">
             <CategorySelectorButton Category="category"
                                     IsActive="@(category == SelectedCategory)"
-                                    OnClickCallback="() => OnCategorySelectorButtonClicked(category)"/>
+                                    OnClickCallback="() => OnCategorySelectorButtonClicked(category)" />
         </div>
     }
 </div>

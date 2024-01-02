@@ -1,0 +1,42 @@
+﻿@using BlazorApp.Shared.Extensions
+
+<label for="@Id" class="form-label">@Label</label>
+@* <NumberInput TValue="int"
+             Min="0"
+             Max="5"
+             @bind-Value="@Qty"
+             Placeholder="Qty"
+             ElementId="@Id" /> *@
+<InputSelect TValue="int"
+             @bind-Value="Qty"
+             class="form-select"
+             aria-label="Quantity Selector">
+    <option value="0">0</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+</InputSelect>
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public BikeSize Size { get; set; }
+
+    [Parameter]
+    public int Qty { get; set; }
+
+    protected string? Id { get; set; }
+
+    protected string? Label { get; set; }
+
+    protected override void OnInitialized()
+    {
+        var sizeStr = Size.GetDisplayName();
+        
+        Label = sizeStr;
+
+        Id = sizeStr.ToLowerInvariant().Replace(' ', '-');
+    }
+
+}

@@ -1,10 +1,6 @@
 :root {
-    --bg-dark: #222222;
-    --bg-light: #EFEFEF;
-    --brand: #7EC243;
-    --brand-dark: #649F33;
-    
-    --bs-primary: var(--brand);
+    --bs-primary: #7EC243;
+    --bs-primary-rgb: 127, 194, 68;
 }
 
 html, body {
@@ -61,7 +57,13 @@ h2,
 h3,
 h4,
 h5,
-h6 {
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
     font-family: 'Alumni Sans', sans-serif;
     font-weight: 800;
     text-transform: uppercase;
@@ -125,7 +127,7 @@ body,
 }
 
 .splash-screen-overlay {
-    background-color: var(--bg-dark);
+    background-color: #222222;
     -webkit-animation: splashScreenFade 5s linear forwards;
     animation: splashScreenFade 5s linear forwards;
 }
@@ -138,4 +140,9 @@ body,
 /* Fix an issue with Blazor.Bootstrap */
 article {
     padding: 0 !important;
+}
+
+/* Fix a failed override of primary color */
+.text-bg-primary {
+    background-color: var(--bs-primary) !important;
 }

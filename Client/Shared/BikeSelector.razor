@@ -5,16 +5,16 @@
 @inject ILogger<BikeSelector> Logger
 
 <div class="row g-3">
-    @foreach (var bike in _bikes)
+    @foreach (var model in _models)
     {
         <div class="col-12">
-            <BikeDetails Bike="@bike" />
+            <ModelDetails Model="@model" />
         </div>
     }
 </div>
 
 @code {
-    private Bike[] _bikes = { };
+    private Model[] _models = { };
 
     [Parameter]
     [EditorRequired]
@@ -24,17 +24,17 @@
     {
         try
         {
-            var allBikes = await Http.GetFromJsonAsync<Bike[]>("/api/Bikes") ?? new Bike[] { };
+            var models = await Http.GetFromJsonAsync<Model[]>("/api/Models") ?? new Model[] { };
 
-            var filteredBikes = allBikes
-                .Where(x => x.Category?.Id.Equals(Category?.Id) == true)
+            var filteredModels = models
+                .Where(x => x.Category.Id.Equals(Category?.Id))
                 .ToArray();
 
-            _bikes = filteredBikes;
+            _models = filteredModels;
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Failed to load bikes");
+            Logger.LogError(ex, "Failed to load models");
         }
     }
 
