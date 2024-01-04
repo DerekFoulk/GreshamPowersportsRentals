@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using AutoBogus;
 using BlazorApp.Shared;
 using BlazorApp.Shared.Extensions;
@@ -13,22 +14,22 @@ public class FakeDatastore
     {
         var manufacturers = new AutoFaker<Manufacturer>().Generate(5);
 
-        var bikeTypes = Enum.GetValues<BikeType>()
+        var bikeTypeDisplayNames = Enum.GetValues<BikeType>()
             .Select(x => x.GetDisplayName())
             .ToList();
 
         var categories = new AutoFaker<Category>()
-            .RuleFor(x => x.Name, f => bikeTypes[f.IndexFaker])
+            .RuleFor(x => x.Name, f => bikeTypeDisplayNames[f.IndexFaker])
             .RuleFor(x => x.Image, (f, x) => GetCategoryImage(x))
-            .Generate(bikeTypes.Count);
+            .Generate(bikeTypeDisplayNames.Count);
         
         var bikeFaker = new AutoFaker<Bike>();
         
         var models = new AutoFaker<Model>()
             .RuleFor(x => x.Manufacturer, f => f.PickRandom(manufacturers))
             .RuleFor(x => x.Category, f => f.PickRandom(categories))
-            .RuleFor(x => x.Description, f => f.Commerce.ProductDescription())
-            .RuleFor(x => x.PricePerHour, f => 1M)
+            .RuleFor(x => x.Description, (f, x) => $"A description of the \"{x.Name}\", manufactured by {x.Manufacturer.Name}. This {x.Type.GetDisplayName().ToLower()} is listed in the \"{x.Category.Name}\" category. It can be rented for {x.PricePerHour:C}/hr ({x.PricePerDay:C}/day) from Gresham Powersports.{Environment.NewLine}{Environment.NewLine}<strong>Available Sizes</strong><ul>{GetAvailableSizesHtml(x)}</ul>")
+            .RuleFor(x => x.PricePerHour, f => f.Finance.Amount(5, 75))
             .RuleFor(x => x.Bikes, (f, x) => bikeFaker.Generate(f.Random.Number(1, 5)))
             .Generate(15);
         
@@ -51,6 +52,24 @@ public class FakeDatastore
         Manufacturers = manufacturers;
         Models = models;
         Rentals = rentals;
+    }
+
+    private string GetAvailableSizesHtml(Model model)
+    {
+        var bikes = model.Bikes;
+        var bikeSizes = bikes.Select(x => x.Size).Distinct();
+
+        var stringBuilder = new StringBuilder();
+
+        foreach (var bikeSize in bikeSizes)
+        {
+            var displayName = bikeSize.GetDisplayName();
+            stringBuilder.AppendLine($"<li>{displayName}</li>");
+        }
+
+        var html = stringBuilder.ToString();
+
+        return html;
     }
 
     public List<Bike> Bikes { get; set; }
@@ -81,7 +100,7 @@ public class FakeDatastore
             }
         };
 
-        var image = categoryImages[category.Name];
+        var image = categoryImages.Single(x => category.Name.Contains(x.Key)).Value;
 
         return image;
     }
