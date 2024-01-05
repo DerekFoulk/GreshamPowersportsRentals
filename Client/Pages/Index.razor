@@ -1,5 +1,6 @@
 ﻿@page "/"
-@inject ILogger<Index> Logger;
+@inject ILogger<Index> Logger
+@inject NavigationManager NavigationManager
 
 <PageTitle>Gresham Powersports - Rentals</PageTitle>
 
@@ -79,17 +80,29 @@
 
     protected override void OnInitialized()
     {
-        var now = DateTime.Now;
-        var start = now.AddHours(1);
-        var end = start.AddDays(1);
-
-        Rental ??= new Rental
+        try
         {
-            StartDate = DateOnly.FromDateTime(start),
-            StartTime = TimeOnly.FromDateTime(start),
-            EndDate = DateOnly.FromDateTime(end),
-            EndTime = TimeOnly.FromDateTime(end)
-        };
+            var now = DateTime.Now;
+            var start = now.AddHours(1);
+            var end = start.AddDays(1);
+
+            Rental ??= new Rental
+            {
+                StartDate = DateOnly.FromDateTime(start),
+                StartTime = TimeOnly.FromDateTime(start),
+                EndDate = DateOnly.FromDateTime(end),
+                EndTime = TimeOnly.FromDateTime(end)
+            };
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, $"Failed to initialize '{nameof(Index)}'");
+        }
+        finally
+        {
+            // TODO: Redirect to Admin portal
+            NavigationManager?.NavigateTo("/admin/types");
+        }
     }
 
     private void Submit()

@@ -1,0 +1,47 @@
+﻿@inject HttpClient Http
+
+<Grid TItem="Bike" class="table table-hover table-bordered table-striped"
+      DataProvider="BikesDataProviderAsync"
+      Responsive="true">
+    <GridColumn TItem="Bike" HeaderText="Id" PropertyName="Id">
+        <span class="d-inline-block text-truncate" style="max-width: 90px;">
+            @context.Id
+        </span>
+    </GridColumn>
+    <GridColumn TItem="Bike" HeaderText="Manufacturer">
+        @context.Model.Manufacturer.Name
+    </GridColumn>
+    <GridColumn TItem="Bike" HeaderText="Model">
+        @context.Model.Name
+    </GridColumn>
+    <GridColumn TItem="Bike" HeaderText="Size" PropertyName="Size">
+        @context.Size
+    </GridColumn>
+    <GridColumn TItem="Bike" HeaderText="Available?" PropertyName="IsAvailable">
+        @context.IsAvailable
+    </GridColumn>
+</Grid>
+
+@code {
+    protected IEnumerable<Bike>? Bikes { get; set; }
+
+    private async Task<GridDataProviderResult<Bike>> BikesDataProviderAsync(GridDataProviderRequest<Bike> request)
+    {
+        Bikes ??= await GetBikesAsync();
+
+        return await Task.FromResult(request.ApplyTo(Bikes));
+    }
+
+    private async Task<IOrderedEnumerable<Bike>> GetBikesAsync()
+    {
+        var bikes = await Http.GetFromJsonAsync<Bike[]>("/api/Bikes") ?? new Bike[] { };
+
+        var sorted = bikes
+            .OrderBy(x => x.Model.Manufacturer.Name)
+            .ThenBy(x => x.Model.Name)
+            .ThenBy(x => x.Size)
+            .ThenByDescending(x => x.IsAvailable);
+
+        return sorted;
+    }
+}

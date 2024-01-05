@@ -2,6 +2,8 @@
 @using System.Web
 @using BlazorApp.Shared.Extensions
 
+@inject ILogger<ModelDetails> Logger
+
 @if (Model is null)
 {
     <Spinner />
@@ -19,7 +21,7 @@ else
                             <Content>
                                 <div class="p-3">
                                     <img class="product-image float-start me-3 mb-3" src="https://placehold.co/350x250?text=@(HttpUtility.UrlEncode(Model.Name))" alt="@Model.Name"/>
-                                    @DescriptionMarkupString
+                                    @Model.Description
                                 </div>
                             </Content>
                         </Tab>
@@ -68,9 +70,6 @@ else
 }
 
 @code {
-    [Inject]
-    ILogger<ModelDetails>? Logger { get; set; }
-
     [CascadingParameter]
     [EditorRequired]
     public Rental? Rental { get; set; }
@@ -79,15 +78,7 @@ else
     [EditorRequired]
     public Model? Model { get; set; }
 
-    protected MarkupString DescriptionMarkupString { get; set; }
-
     protected decimal? Price { get; set; }
-
-    protected override void OnInitialized()
-    {
-        if (Model?.Description != null)
-            DescriptionMarkupString = new MarkupString(Model.Description);
-    }
 
     protected override void OnParametersSet()
     {

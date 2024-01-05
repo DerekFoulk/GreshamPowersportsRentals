@@ -14,4 +14,6 @@ public class Bike
     public BikeSize Size { get; set; }
 
     public bool IsAvailable { get; set; }
+
+    public Model Model { get; set; }
 }

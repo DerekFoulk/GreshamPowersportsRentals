@@ -1,0 +1,25 @@
+﻿<Grid TItem="BikeSize" class="table table-hover table-bordered table-striped"
+      DataProvider="BikeSizesDataProviderAsync"
+      Responsive="true">
+    <GridColumn TItem="BikeSize" HeaderText="Size">
+        @context (@context.GetDisplayName())
+    </GridColumn>
+</Grid>
+
+@code {
+    protected IEnumerable<BikeSize>? BikeSizes { get; set; }
+
+    private async Task<GridDataProviderResult<BikeSize>> BikeSizesDataProviderAsync(GridDataProviderRequest<BikeSize> request)
+    {
+        BikeSizes ??= GetBikeSizes();
+
+        return await Task.FromResult(request.ApplyTo(BikeSizes));
+    }
+
+    private IEnumerable<BikeSize> GetBikeSizes()
+    {
+        var bikeSizes = Enum.GetValues<BikeSize>();
+
+        return bikeSizes;
+    }
+}
