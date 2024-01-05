@@ -1,0 +1,47 @@
+﻿@inject HttpClient Http
+
+<Grid TItem="Rental" class="table table-hover table-bordered table-striped"
+      DataProvider="RentalsDataProviderAsync"
+      Responsive="true">
+    <GridColumn TItem="Rental" HeaderText="Id" PropertyName="Id">
+        <span class="d-inline-block text-truncate" style="max-width: 90px;">
+            @context.Id
+        </span>
+    </GridColumn>
+    <GridColumn TItem="Rental" HeaderText="Start">
+        @(context.StartDate.ToDateTime(context.StartTime))
+    </GridColumn>
+    <GridColumn TItem="Rental" HeaderText="End">
+        @(context.EndDate.ToDateTime(context.EndTime))
+    </GridColumn>
+    <GridColumn TItem="Rental" HeaderText="Bikes">
+        <ul>
+            @foreach (var bike in context.Bikes)
+            {
+                <li>@bike.ToString()</li>
+            }
+        </ul>
+    </GridColumn>
+</Grid>
+
+@code {
+    protected IEnumerable<Rental>? Rentals { get; set; }
+
+    private async Task<GridDataProviderResult<Rental>> RentalsDataProviderAsync(GridDataProviderRequest<Rental> request)
+    {
+        Rentals ??= await GetRentalsAsync();
+
+        return await Task.FromResult(request.ApplyTo(Rentals));
+    }
+
+    private async Task<IOrderedEnumerable<Rental>> GetRentalsAsync()
+    {
+        var rentals = await Http.GetFromJsonAsync<Rental[]>("/api/Rentals") ?? new Rental[] { };
+
+        var sorted = rentals
+            .OrderByDescending(x => x.StartDate.ToDateTime(x.StartTime))
+            .ThenByDescending(x => x.EndDate.ToDateTime(x.EndTime));
+
+        return sorted;
+    }
+}

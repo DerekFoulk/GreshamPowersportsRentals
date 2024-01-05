@@ -1,8 +1,38 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page">
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="https://greshampowersports.com/portals/greshampowersports/favicon.ico?ver=RLvQCsYt1Cg3Ar0SZ4mWGQ%3d%3d" class="d-inline-block align-text-middle" alt="Gresham Powersports Logo" height="24" />
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All" aria-current="page">Rentals</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="/admin">Admin</NavLink>
+                    </li>
+                </ul>
+                <form class="d-flex" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                    <Button Color="ButtonColor.Success"
+                            Outline="true"
+                            Type="ButtonType.Submit"
+                            Class="text-nowrap">
+                        <Icon Name="IconName.Search" /> Search
+                    </Button>
+                </form>
+            </div>
+        </div>
+    </nav>
+    <div style="height: 56px;"></div>
     <main>
-        <article>
+        <article class="content">
             @Body
         </article>
     </main>

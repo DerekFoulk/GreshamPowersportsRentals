@@ -1,4 +1,5 @@
 ﻿using System;
+using BlazorApp.Shared.Extensions;
 
 namespace BlazorApp.Shared;
 
@@ -16,4 +17,9 @@ public class Bike
     public bool IsAvailable { get; set; }
 
     public Model Model { get; set; }
+
+    public override string ToString()
+    {
+        return $"{Model.Manufacturer.Name} {Model.Name} ({Size.GetDisplayName()})";
+    }
 }

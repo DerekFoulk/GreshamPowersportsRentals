@@ -15,8 +15,8 @@
             </a>
         </div>
 
-        <article class="content px-4">
-            <div class="py-2">
+        <article class="content">
+            <div class="container-fluid py-3">
                 @Body
             </div>
         </article>
@@ -27,7 +27,7 @@
 <style>
     :root {
         --bb-violet: var(--bs-primary);
-        --bb-sidebar-nav-item-text-active-color-rgb: var(--bs-primary-rgb);
+        --bb-sidebar-nav-item-text-active-color-rgb: var(--bs-dark-rgb);
     }
 </style>
 
@@ -54,7 +54,8 @@
             new NavItem { Id = "5", Href = "/admin/categories", IconName = IconName.Tags, Text = "Categories"},
             new NavItem { Id = "6", Href = "/admin/manufacturers", IconName = IconName.Building, Text = "Manufacturers"},
             new NavItem { Id = "7", Href = "/admin/models", IconName = IconName.Box, Text = "Models"},
-            new NavItem { Id = "8", Href = "/admin/rentals", IconName = IconName.Cart, Text = "Rentals"}
+            new NavItem { Id = "8", Href = "/admin/rentals", IconName = IconName.Cart, Text = "Rentals"},
+            new NavItem { Id = "9", Href = "/admin/settings", IconName = IconName.Gear, Text = "Settings"}
         };
 
         return navItems;

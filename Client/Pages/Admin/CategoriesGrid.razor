@@ -1,0 +1,37 @@
+﻿@inject HttpClient Http
+
+<Grid TItem="Category" class="table table-hover table-bordered table-striped"
+      DataProvider="CategoriesDataProviderAsync"
+      Responsive="true">
+    <GridColumn TItem="Category" HeaderText="Id" PropertyName="Id">
+        <span class="d-inline-block text-truncate" style="max-width: 90px;">
+            @context.Id
+        </span>
+    </GridColumn>
+    <GridColumn TItem="Category" HeaderText="Name" PropertyName="Name">
+        @context.Name
+    </GridColumn>
+    <GridColumn TItem="Category" HeaderText="Image" PropertyName="Image">
+        <img class="img-fluid" src="@context.Image" alt="@context.Name" style="max-width: 200px;" />
+    </GridColumn>
+</Grid>
+
+@code {
+    protected IEnumerable<Category>? Categories { get; set; }
+
+    private async Task<GridDataProviderResult<Category>> CategoriesDataProviderAsync(GridDataProviderRequest<Category> request)
+    {
+        Categories ??= await GetCategoriesAsync();
+
+        return await Task.FromResult(request.ApplyTo(Categories));
+    }
+
+    private async Task<IOrderedEnumerable<Category>> GetCategoriesAsync()
+    {
+        var categories = await Http.GetFromJsonAsync<Category[]>("/api/Categories") ?? new Category[] { };
+        var sorted = categories
+            .OrderBy(x => x.Name);
+
+        return sorted;
+    }
+}
