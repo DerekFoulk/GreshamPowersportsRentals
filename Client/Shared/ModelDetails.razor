@@ -87,7 +87,7 @@ else
 
     private decimal? CalculatePrice()
     {
-        Logger?.LogDebug("Calculating price");
+        Logger?.LogTrace("Calculating price");
 
         if (Model is null)
         {
@@ -110,19 +110,19 @@ else
         var rentalStart = Rental.StartDate.ToDateTime(Rental.StartTime);
         var rentalEnd = Rental.EndDate.ToDateTime(Rental.EndTime);
 
-        Logger?.LogDebug($"Rental Start: {rentalStart}");
-        Logger?.LogDebug($"Rental End: {rentalEnd}");
+        Logger?.LogTrace($"Rental Start: {rentalStart}");
+        Logger?.LogTrace($"Rental End: {rentalEnd}");
 
         var duration = rentalEnd - rentalStart;
 
-        Logger?.LogDebug($"Duration: {duration}");
+        Logger?.LogTrace($"Duration: {duration}");
 
         var hours = (decimal)duration.TotalHours;
         var price = hours * Model.PricePerHour;
 
-        Logger?.LogDebug($"Bike Price per Hour: {Model.PricePerHour:C}");
+        Logger?.LogTrace($"Bike Price per Hour: {Model.PricePerHour:C}");
 
-        Logger?.LogDebug($"Price: {price:C}");
+        Logger?.LogTrace($"Price: {price:C}");
 
         return price;
     }
