@@ -39,13 +39,7 @@ namespace Data.Husqvarna.Pages.Shared
 
             // Throw an exception if Models submenu items are not found
             if (modelsSubmenuItems == null)
-            {
-                var exception = new NullReferenceException($"'{nameof(modelsSubmenuItems)}' cannot be null");
-
-                Logger.LogError(exception, "Unable to get models");
-
-                throw exception;
-            }
+                throw new NullReferenceException($"'{nameof(modelsSubmenuItems)}' cannot be null");
 
             var allModelMenuItems = new List<IWebElement>();
 

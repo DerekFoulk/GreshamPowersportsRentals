@@ -2,7 +2,9 @@
 using Data.Husqvarna.Models;
 using Data.Husqvarna.Pages;
 using Microsoft.Extensions.Logging;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Edge;
+using System;
 
 namespace Data.Husqvarna.Services
 {
@@ -19,6 +21,8 @@ namespace Data.Husqvarna.Services
 
         public List<HusqvarnaBicycleInfo> GetBicycleInfos()
         {
+            _logger.LogTrace("Getting bikes from Husqvarna's website");
+
             var webDriver = _webDriverFactory.GetWebDriver<EdgeDriver>(TimeSpan.FromSeconds(3), true);
 
             var bicycleInfos = new List<HusqvarnaBicycleInfo>();
@@ -26,7 +30,18 @@ namespace Data.Husqvarna.Services
             try
             {
                 var homePage = new HomePage(_logger, webDriver);
-                var modelMenuItems = homePage.MainMenuElement.GetModelMenuItems();
+
+                List<IWebElement> modelMenuItems;
+                try
+                {
+                    modelMenuItems = homePage.MainMenuElement.GetModelMenuItems();
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Failed to get menu items in 'Models'");
+
+                    throw;
+                }
 
                 _logger.LogTrace($"Scraped '{modelMenuItems.Count}' models from the menu");
 

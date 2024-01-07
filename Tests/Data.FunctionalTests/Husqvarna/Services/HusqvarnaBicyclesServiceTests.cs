@@ -9,7 +9,7 @@ namespace Data.FunctionalTests.Husqvarna.Services
 {
     public class HusqvarnaBicyclesServiceTests : LoggingTestsBase<HusqvarnaBicyclesService>
     {
-        public HusqvarnaBicyclesServiceTests(ITestOutputHelper output) : base(output, LogLevel.Debug)
+        public HusqvarnaBicyclesServiceTests(ITestOutputHelper output) : base(output, LogLevel.Trace)
         {
         }
 

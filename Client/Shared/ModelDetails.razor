@@ -82,7 +82,16 @@ else
 
     protected override void OnParametersSet()
     {
-        Price = CalculatePrice();
+        try
+        {
+            Price = CalculatePrice();
+        }
+        catch (Exception e)
+        {
+            Logger?.LogError(e, "Cannot calculate price");
+            
+            throw;
+        }
     }
 
     private decimal? CalculatePrice()
@@ -90,22 +99,10 @@ else
         Logger?.LogTrace("Calculating price");
 
         if (Model is null)
-        {
-            var exception = new InvalidOperationException($"'{nameof(Model)}' must not be null");
-            
-            Logger?.LogError(exception, "Cannot calculate price");
-
-            throw exception;
-        }
+            throw new InvalidOperationException($"'{nameof(Model)}' must not be null");
 
         if (Rental is null)
-        {
-            var exception = new InvalidOperationException($"'{nameof(Rental)}' must not be null");
-
-            Logger?.LogError(exception, "Cannot calculate price");
-
-            throw exception;
-        }
+            throw new InvalidOperationException($"'{nameof(Rental)}' must not be null");
 
         var rentalStart = Rental.StartDate.ToDateTime(Rental.StartTime);
         var rentalEnd = Rental.EndDate.ToDateTime(Rental.EndTime);

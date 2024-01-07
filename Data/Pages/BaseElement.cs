@@ -11,6 +11,7 @@ namespace Data.Pages
             Logger = logger;
             WebDriver = webDriver;
 
+            Logger.LogTrace("Reinitializing elements for element object");
             PageFactory.InitElements(WebDriver, this);
         }
 

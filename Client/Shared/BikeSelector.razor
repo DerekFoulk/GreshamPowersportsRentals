@@ -32,9 +32,9 @@
 
             _models = filteredModels;
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Logger.LogError(ex, "Failed to load models");
+            Logger.LogError(e, "Failed to load models");
         }
     }
 
