@@ -8,19 +8,19 @@ namespace Api
 {
     public class BikeFunction
     {
-        private readonly FakeDatastore _fakeDatastore;
+        private readonly IDatastore _datastore;
         private readonly ILogger _logger;
 
-        public BikeFunction(ILoggerFactory loggerFactory, FakeDatastore fakeDatastore)
+        public BikeFunction(ILoggerFactory loggerFactory, IDatastore datastore)
         {
-            _fakeDatastore = fakeDatastore;
+            _datastore = datastore;
             _logger = loggerFactory.CreateLogger<BikeFunction>();
         }
 
         [Function("Bikes")]
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
         {
-            var result = _fakeDatastore.Bikes;
+            var result = _datastore.Bikes;
 
             var response = req.CreateResponse(HttpStatusCode.OK);
 

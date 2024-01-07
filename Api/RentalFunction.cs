@@ -8,19 +8,19 @@ namespace Api
 {
     public class RentalFunction
     {
-        private readonly FakeDatastore _fakeDatastore;
+        private readonly IDatastore _datastore;
         private readonly ILogger _logger;
 
-        public RentalFunction(ILoggerFactory loggerFactory, FakeDatastore fakeDatastore)
+        public RentalFunction(ILoggerFactory loggerFactory, IDatastore datastore)
         {
-            _fakeDatastore = fakeDatastore;
+            _datastore = datastore;
             _logger = loggerFactory.CreateLogger<RentalFunction>();
         }
 
         [Function("Rentals")]
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
         {
-            var result = _fakeDatastore.Rentals;
+            var result = _datastore.Rentals;
 
             var response = req.CreateResponse(HttpStatusCode.OK);
 

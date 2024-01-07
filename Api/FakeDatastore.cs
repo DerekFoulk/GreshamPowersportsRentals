@@ -8,7 +8,7 @@ using BlazorApp.Shared.Extensions;
 
 namespace Api;
 
-public class FakeDatastore
+public class FakeDatastore : IDatastore
 {
     public FakeDatastore()
     {
@@ -22,9 +22,9 @@ public class FakeDatastore
             .RuleFor(x => x.Name, f => bikeTypeDisplayNames[f.IndexFaker])
             .RuleFor(x => x.Image, (f, x) => GetCategoryImage(x))
             .Generate(bikeTypeDisplayNames.Count);
-        
+
         var bikeFaker = new AutoFaker<Bike>();
-        
+
         var models = new AutoFaker<Model>()
             .RuleFor(x => x.Manufacturer, f => f.PickRandom(manufacturers))
             .RuleFor(x => x.Category, f => f.PickRandom(categories))
@@ -32,7 +32,7 @@ public class FakeDatastore
             .RuleFor(x => x.PricePerHour, f => f.Finance.Amount(5, 75))
             .RuleFor(x => x.Bikes, (f, x) => bikeFaker.Generate(f.Random.Number(1, 5)))
             .Generate(15);
-        
+
         var bikes = models.SelectMany(x => x.Bikes).ToList();
 
         var rentals = new AutoFaker<Rental>()
