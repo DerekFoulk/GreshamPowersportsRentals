@@ -37,7 +37,7 @@ namespace Data.Specialized.Pages
             var currentPageNumber = GetCurrentPageNumberFromUrl();
 
             // TODO: Figure out why the first page is scraped twice
-            while (!IsLastPage())
+            while (!IsLastPage() && currentPageNumber == 1)
             {
                 //var currentPageNumber = GetCurrentPageNumberFromUrl();
 

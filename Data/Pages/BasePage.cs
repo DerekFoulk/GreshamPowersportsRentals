@@ -11,12 +11,17 @@ namespace Data.Pages
             Logger = logger;
             WebDriver = webDriver;
 
-            Logger.LogTrace("Reinitializing elements for page object");
-            PageFactory.InitElements(WebDriver, this);
+            UpdatePageObject();
         }
 
         protected ILogger Logger { get; }
 
         protected IWebDriver WebDriver { get; }
+
+        protected void UpdatePageObject()
+        {
+            Logger.LogTrace("Reinitializing elements for page object");
+            PageFactory.InitElements(WebDriver, this);
+        }
     }
 }

@@ -29,16 +29,24 @@ namespace Data.Specialized.Services
             {
                 var bikesPage = new BikesPage(_logger, webDriver);
                 
-                var urls = bikesPage.GetBikeDetailUrlsAcrossPages();
+                var urls = bikesPage.GetBikeDetailUrlsAcrossPages().Distinct();
+
+                var scrapedBikesCount = 0;
 
                 foreach (var url in urls)
                 {
+                    // TODO: Remove
+                    if (scrapedBikesCount >= 2)
+                        break;
+                    
                     webDriver.Navigate().GoToUrl(url);
 
                     var bikeDetailsPage = new BikeDetailsPage(_logger, webDriver);
                     var bikeDetails = bikeDetailsPage.GetBikeDetails();
 
                     bikes.Add(bikeDetails);
+
+                    scrapedBikesCount++;
                 }
             }
             finally

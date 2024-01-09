@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Text;
+using Data.Extensions;
 using Data.Husqvarna.Pages.Shared;
 using Data.Specialized.Exceptions;
 using Data.Specialized.Models;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.PageObjects;
 using SeleniumExtras.WaitHelpers;
@@ -78,11 +82,17 @@ namespace Data.Specialized.Pages
         {
             Logger.LogTrace($"Getting model configurations for '{name}'");
 
+            WaitForPageToLoad();
+
             var modelConfigurations = new List<ModelConfiguration>();
 
             foreach (var sizeButton in SizeButtons)
             {
                 Logger.LogTrace($"Clicking '{sizeButton.Text}' button");
+
+                Logger.LogTrace($"Scrolling to '{nameof(sizeButton)}'");
+                
+                WebDriver.ScrollToElement(sizeButton);
 
                 sizeButton.Click();
 
@@ -94,6 +104,10 @@ namespace Data.Specialized.Pages
                 {
                     Logger.LogTrace($"Clicking '{colorButton.Text}' button");
 
+                    Logger.LogTrace($"Scrolling to '{nameof(colorButton)}'");
+                    
+                    WebDriver.ScrollToElement(colorButton);
+                    
                     colorButton.Click();
 
                     var color = WebDriver.FindElement(By.CssSelector("p.sc-e4145e4c-10.fhNxpW")).Text.Trim();
@@ -108,7 +122,9 @@ namespace Data.Specialized.Pages
 
                     var images = GetImages();
 
-                    var geometry = GetGeometry(size);
+                    // TODO: Fix this slow running process
+                    //var geometry = GetGeometry(size);
+                    Geometry geometry = default;
 
                     var modelConfiguration = new ModelConfiguration(partNumber, pricing, color, images, size, geometry);
 
@@ -119,24 +135,43 @@ namespace Data.Specialized.Pages
             return modelConfigurations;
         }
 
+        private void WaitForPageToLoad()
+        {
+            var stopwatch = Stopwatch.StartNew();
+
+            Logger.LogTrace("Waiting for page to load...");
+
+            new WebDriverWait(WebDriver, TimeSpan.FromSeconds(5))
+                .Until(ExpectedConditions.ElementExists(By.CssSelector(".swiper-wrapper")));
+
+            stopwatch.Stop();
+
+            Logger.LogTrace($"Page loaded after '{stopwatch.Elapsed}'");
+        }
+
         private Geometry GetGeometry(SpecializedBikeSize size)
         {
             Logger.LogTrace($"Getting geometry for '{size}'");
 
-            Logger.LogTrace("Expanding the 'Geometry accordion item");
+            Logger.LogTrace("Expanding the 'Geometry' accordion item");
 
             // Expand the "Geometry" accordion item
             TechnicalSpecificationsAccordion.FindElements(By.TagName("h3")).Single(x =>
                 x.Text.Trim().Equals("Geometry", StringComparison.OrdinalIgnoreCase)).Click();
 
-            var geometryTableHead = TechnicalSpecificationsAccordion.FindElement(By.TagName("table thead"));
+            Logger.LogTrace("Getting 'th' text values to determine which column to read");
+
+            var geometryTableHead = TechnicalSpecificationsAccordion.FindElement(By.TagName("thead"));
             var columnHeaderValues = geometryTableHead
                 .FindElements(By.TagName("th")).Select(x => x.Text.Trim()).ToList();
-            var focusedColumn = columnHeaderValues.IndexOf(size.ToString());
-            var geometryTableBody = TechnicalSpecificationsAccordion.FindElement(By.TagName("table tbody"));
+            var focusedColumnIndex = columnHeaderValues.IndexOf(size.ToString());
+            
+            var geometryTableBody = TechnicalSpecificationsAccordion.FindElement(By.TagName("tbody"));
             var rows = geometryTableBody.FindElements(By.TagName("tr"));
 
             var dimensions = new Dictionary<string, string>();
+
+            Logger.LogTrace("Scraping dimensions from table rows");
 
             foreach (var row in rows)
             {
@@ -144,13 +179,11 @@ namespace Data.Specialized.Pages
 
                 try
                 {
-                    GetDimensionFromRow(row, focusedColumn, dimensions, rowIndex, size);
+                    GetDimensionFromRow(row, focusedColumnIndex, dimensions, rowIndex, size);
                 }
                 catch (Exception e)
                 {
                     Logger.LogError(e, "Failed to get dimension from row");
-                    
-                    throw;
                 }
             }
 
@@ -159,16 +192,37 @@ namespace Data.Specialized.Pages
             return geometry;
         }
 
-        private void GetDimensionFromRow(IWebElement row, int focusedColumn, Dictionary<string, string> dimensions,
+        private void GetDimensionFromRow(IWebElement row, int focusedColumnIndex, Dictionary<string, string> dimensions,
             int rowIndex, SpecializedBikeSize size)
         {
+            ArgumentNullException.ThrowIfNull(row);
+
+            Logger.LogTrace($"Getting dimension from row #{rowIndex}");
+
+            Logger.LogTrace($"Scrolling to '{nameof(row)}' (#{rowIndex})");
+            
+            WebDriver.ScrollToElement(row);
+
             var columns = row.FindElements(By.TagName("td"));
+
+            if (columns is null)
+                throw new NullReferenceException($"'{nameof(columns)}' cannot be null");
+
+            if (columns.Count < (focusedColumnIndex + 1))
+                throw new ArgumentOutOfRangeException(nameof(focusedColumnIndex), $"Focused column index ({focusedColumnIndex}) exceeds column count ({columns.Count}) in row #{rowIndex}");
 
             // Throw an exception if any td elements have a colspan or rowspan set as it would cause misinterpretation of values
             ThrowIfTableLayoutIsUnexpected(columns);
 
+            Logger.LogTrace($"Getting dimension from row #{rowIndex}");
+
             var key = columns.First().Text.Trim();
-            var value = columns.ElementAt(focusedColumn).Text.Trim();
+            Logger.LogTrace($"Name: {key}");
+            
+            var value = columns.ElementAt(focusedColumnIndex).Text.Trim();
+            Logger.LogTrace($"Value: {value}");
+
+            Logger.LogTrace($"Attempting to add dimension to '{nameof(dimensions)}'");
 
             if (!dimensions.TryAdd(key, value))
             {
@@ -178,7 +232,7 @@ namespace Data.Specialized.Pages
                 stringBuilder.AppendLine($"{nameof(key)}: {key}");
                 stringBuilder.AppendLine($"{nameof(value)}: {value}");
                 stringBuilder.AppendLine($"{nameof(row)}: {rowIndex}");
-                stringBuilder.AppendLine($"{nameof(focusedColumn)}: {focusedColumn}");
+                stringBuilder.AppendLine($"{nameof(focusedColumnIndex)}: {focusedColumnIndex}");
                 stringBuilder.AppendLine($"{nameof(size)}: {size}");
                 stringBuilder.AppendLine($"{nameof(WebDriver)}.{nameof(WebDriver.Url)}: {WebDriver.Url}");
 
@@ -186,10 +240,14 @@ namespace Data.Specialized.Pages
 
                 throw new Exception(message);
             }
+
+            Logger.LogTrace("Dimension was added successfully");
         }
 
         private void ThrowIfTableLayoutIsUnexpected(ReadOnlyCollection<IWebElement> columns)
         {
+            Logger.LogTrace("Validating table layout");
+
             var attributes = new List<string>
             {
                 "colspan",
@@ -237,37 +295,57 @@ namespace Data.Specialized.Pages
 
             if (isTableStructureInvalid)
                 throw new UnexpectedTableLayoutException("Unexpected table structure encountered");
+
+            Logger.LogTrace("Table structure is valid");
         }
 
         private IEnumerable<string> GetImages()
         {
+            Logger.LogTrace($"Getting images from '{nameof(Gallery)}'");
+
             var images = new List<string>();
 
             var imgElements = Gallery.FindElements(By.TagName("img"));
+
+            Logger.LogTrace($"Found {imgElements.Count} 'img' elements in the '{nameof(Gallery)}' element");
 
             foreach (var imgElement in imgElements)
             {
                 var src = imgElement.GetAttribute("src").Trim();
 
+                Logger.LogTrace($"Adding '{src}' to images");
+
                 images.Add(src);
             }
+
+            Logger.LogTrace($"Scraped {images.Count} images from '{nameof(Gallery)}'");
 
             return images;
         }
 
         private Pricing GetPricing()
         {
+            Logger.LogTrace($"Getting pricing from '{nameof(Prices)}'");
+
             var amounts = new List<decimal>();
 
             foreach (var webElement in Prices)
             {
-                var amount = decimal.Parse(webElement.Text);
+                var amount = decimal.Parse(webElement.Text, NumberStyles.Currency);
+
+                Logger.LogTrace($"Adding price of '{amount:C}'");
 
                 amounts.Add(amount);
             }
 
             var msrp = amounts.Max();
+
+            Logger.LogTrace($"MSRP: '{msrp:C}'");
+
             var price = amounts.Min();
+            
+            Logger.LogTrace($"Price: '{price:C}'");
+
             var pricing = new Pricing(msrp, price);
 
             return pricing;
@@ -295,40 +373,50 @@ namespace Data.Specialized.Pages
             // Open the modal by clicking the "Read More" button
             ReadMoreButton.Click();
 
-            Logger.LogTrace("Reinitializing elements for page object");
-            PageFactory.InitElements(WebDriver, this);
+            var modalLocator = this.GetByFrom(nameof(Modal));
 
-            const string cssSelector = "div.sc-45035464-0.kmmKVJ";
+            new WebDriverWait(WebDriver, TimeSpan.FromSeconds(5))
+                .Until(ExpectedConditions.ElementIsVisible(modalLocator));
 
-            Logger.LogTrace($"Attempting to find the description element ('{cssSelector}')");
+            ////Logger.LogTrace("Reinitializing elements for page object");
+            ////PageFactory.InitElements(WebDriver, this);
 
-            var descriptionBy = By.CssSelector(cssSelector);
+            ////const string cssSelector = "div.sc-45035464-0.kmmKVJ";
+            //const string cssSelector = ".paragraph-wrapper";
 
-            try
-            {
-                Logger.LogTrace($"Waiting for the description element ('{cssSelector}') to become visible");
+            //Logger.LogTrace($"Attempting to find the description element ('{cssSelector}')");
 
-                new WebDriverWait(WebDriver, TimeSpan.FromSeconds(10))
-                    .Until(ExpectedConditions.ElementIsVisible(descriptionBy));
-            }
-            catch (WebDriverTimeoutException e)
-            {
-                Logger.LogError(e, $"Could not see the '{cssSelector}' element");
+            //var descriptionLocator = By.CssSelector(cssSelector);
 
-                var explodedCssSelectors = cssSelector.Split('.').ToList();
-                var cssSelectors = explodedCssSelectors.Where(x => explodedCssSelectors.IndexOf(x) != 0).ToList();
+            //try
+            //{
+            //    Logger.LogTrace($"Waiting for the description element ('{cssSelector}') to become visible");
 
-                Logger.LogTrace($"Checking page source for presence of the '{cssSelector}' element");
+            //    new WebDriverWait(WebDriver, TimeSpan.FromSeconds(3))
+            //        .Until(ExpectedConditions.ElementIsVisible(descriptionLocator));
+            //}
+            //catch (WebDriverTimeoutException e)
+            //{
+            //    Logger.LogError(e, $"Could not see the '{cssSelector}' element");
 
-                ThrowIfPageSourceContainsElementWithAnySelectors(cssSelectors);
+            //    var explodedCssSelectors = cssSelector.Split('.').ToList();
+            //    var cssSelectors = explodedCssSelectors.Where(x => explodedCssSelectors.IndexOf(x) != 0).ToList();
 
-                throw;
-            }
+            //    Logger.LogTrace($"Checking page source for presence of the '{cssSelector}' element");
 
-            var description = Modal.FindElement(descriptionBy).GetAttribute("innerHTML");
+            //    ThrowIfPageSourceContainsElementWithAnySelectors(cssSelectors);
+
+            //    throw;
+            //}
+
+            //var description = Modal.FindElement(descriptionLocator).GetAttribute("innerHTML");
+
+            var description = Modal.Text;
 
             // Close the modal by clicking the "X" button
-            Modal.FindElement(By.CssSelector(".sc-56219169-0.eRyXhD")).Click();
+            //const string closeButtonCssSelector = ".sc-56219169-0.eRyXhD";
+            const string closeButtonCssSelector = ".jUEINs";
+            Modal.FindElement(By.CssSelector(closeButtonCssSelector)).Click();
 
             return description;
         }
