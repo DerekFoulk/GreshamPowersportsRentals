@@ -19,7 +19,7 @@ namespace Data.Specialized.Pages
 
         public void GoToPage(int pageNumber = 1)
         {
-            Logger.LogTrace("Navigating to the 'Bikes' page");
+            Logger.LogTrace($"Navigating to the 'Bikes' page ({pageNumber})");
 
             WebDriver.Navigate().GoToUrl($"https://www.specialized.com/us/en/c/bikes?group=Bikes&group=E-Bikes&page={pageNumber}");
         }
@@ -47,7 +47,8 @@ namespace Data.Specialized.Pages
 
                 //var nextPageNumber = GoToNextPage(currentPageNumber);
 
-                GoToPage(currentPageNumber++);
+                var nextPage = currentPageNumber++;
+                GoToPage(nextPage);
             }
 
             return bikeDetailsPagesToScrape;

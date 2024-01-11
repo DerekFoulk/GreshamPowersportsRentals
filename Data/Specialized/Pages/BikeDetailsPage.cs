@@ -1,60 +1,58 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.Globalization;
+using System.Reflection;
 using System.Text;
 using Data.Extensions;
-using Data.Husqvarna.Pages.Shared;
+using Data.Pages;
 using Data.Specialized.Exceptions;
 using Data.Specialized.Models;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.PageObjects;
 using SeleniumExtras.WaitHelpers;
 
 namespace Data.Specialized.Pages
 {
-    public class BikeDetailsPage : Page<BikeDetailsPage>
+    public class BikeDetailsPage : BasePage<BikeDetailsPage>
     {
         public BikeDetailsPage(ILogger logger, IWebDriver webDriver) : base(logger, webDriver)
         {
         }
 
         [FindsBy(How = How.CssSelector, Using = "nav[aria-label=\"breadcrumb\"]")]
-        public IWebElement Breadcrumbs { get; set; }
+        public IWebElement? Breadcrumbs { get; set; }
 
         [FindsBy(How = How.CssSelector, Using = "div[data-component=\"sidebar\"]")]
-        public IWebElement Sidebar { get; set; }
+        public IWebElement? Sidebar { get; set; }
 
         [FindsBy(How = How.CssSelector, Using = "div[data-component=\"gallery-wrapper\"]")]
-        public IWebElement Gallery { get; set; }
+        public IWebElement? Gallery { get; set; }
 
         [FindsBy(How = How.CssSelector, Using = "div[data-component=\"product-detail-header\"]")]
-        public IWebElement ProductDetailHeader { get; set; }
+        public IWebElement? ProductDetailHeader { get; set; }
 
         [FindsBy(How = How.CssSelector, Using = "div.sc-7881ce43-5.kNHxFW h5")]
-        public IList<IWebElement> Prices { get; set; }
+        public IList<IWebElement>? Prices { get; set; }
 
         [FindsBy(How = How.CssSelector, Using = "div[data-component=\"color-selection\"] button")]
-        public IList<IWebElement> ColorButtons { get; set; }
+        public IList<IWebElement>? ColorButtons { get; set; }
 
         [FindsBy(How = How.CssSelector, Using = "p.sc-e4145e4c-10.fhNxpW")]
-        public IWebElement ColorLabel { get; set; }
+        public IWebElement? ColorLabel { get; set; }
 
         [FindsBy(How = How.CssSelector, Using = "div[data-component=\"size-selection\"] button")]
-        public IList<IWebElement> SizeButtons { get; set; }
+        public IList<IWebElement>? SizeButtons { get; set; }
 
         [FindsBy(How = How.CssSelector, Using = "button.sc-d636bba-0.sc-d636bba-3.qDQJb.bzPHbY")]
-        public IWebElement ReadMoreButton { get; set; }
+        public IWebElement? ReadMoreButton { get; set; }
 
         [FindsBy(How = How.Id, Using = "modal-root")]
-        public IWebElement Modal { get; set; }
+        public IWebElement? Modal { get; set; }
 
         [FindsBy(How = How.CssSelector, Using = "div[data-component=\"technical-specifications-accordion\"]")]
-        public IWebElement TechnicalSpecificationsAccordion { get; set; }
+        public IWebElement? TechnicalSpecificationsAccordion { get; set; }
 
         public Model GetBikeDetails()
         {
@@ -68,14 +66,53 @@ namespace Data.Specialized.Pages
 
             Logger.LogTrace($"Description: {description}");
 
+            var videos = GetVideos()?.ToList();
+
+            Logger.LogTrace($"Videos: {videos?.Count ?? 0}");
+
             var modelConfigurations = GetModelConfigurations(name);
 
             TechnicalSpecifications technicalSpecifications = null;
             List<ManualDownload> manualDownloads = null;
 
-            var model = new Model(name, description, technicalSpecifications, manualDownloads, modelConfigurations);
+            var model = new Model(name, description, technicalSpecifications, manualDownloads, modelConfigurations, videos);
             
             return model;
+        }
+
+        private IEnumerable<string>? GetVideos()
+        {
+            IEnumerable<string>? videos = null;
+            
+            try
+            {
+                Logger.LogTrace("Scraping YouTube video links");
+
+                var videoLinks = WebDriver.FindElements(By.CssSelector("a[href*=\"youtube\"]"));
+
+                Logger.LogTrace("Getting 'href' attributes from all video links");
+
+                videos = videoLinks.Select(x => x.GetAttribute("href"));
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Failed to scrape videos");
+
+                var fileName = $"{DateTime.Now:yyyyMMddHHmmss}_{GetType().FullName}_{MethodBase.GetCurrentMethod()?.Name}_{e.GetType().FullName}";
+
+                try
+                {
+                    Logger.LogDebug($"Capturing HTML and screenshot ('{fileName}')");
+
+                    WebDriver.CaptureHtmlAndScreenshot(fileName);
+                }
+                catch (Exception exception)
+                {
+                    Logger.LogError(exception, $"Failed to save HTML and screenshot ('{fileName}')");
+                }
+            }
+
+            return videos;
         }
 
         private IEnumerable<ModelConfiguration> GetModelConfigurations(string name)
@@ -85,6 +122,8 @@ namespace Data.Specialized.Pages
             WaitForPageToLoad();
 
             var modelConfigurations = new List<ModelConfiguration>();
+
+            var geometryTable = GetGeometryTable();
 
             foreach (var sizeButton in SizeButtons)
             {
@@ -96,21 +135,24 @@ namespace Data.Specialized.Pages
 
                 sizeButton.Click();
 
-                var size = Enum.Parse<SpecializedBikeSize>(sizeButton.Text);
+                var size = sizeButton.Text;
 
                 Logger.LogTrace($"Size: {size}");
 
+                var geometry = GetGeometryFromGeometryTable(size, geometryTable);
+
                 foreach (var colorButton in ColorButtons)
                 {
-                    Logger.LogTrace($"Clicking '{colorButton.Text}' button");
-
                     Logger.LogTrace($"Scrolling to '{nameof(colorButton)}'");
                     
                     WebDriver.ScrollToElement(colorButton);
                     
                     colorButton.Click();
 
-                    var color = WebDriver.FindElement(By.CssSelector("p.sc-e4145e4c-10.fhNxpW")).Text.Trim();
+                    var color = WebDriver
+                        .FindElement(By.CssSelector("[data-component=\"color-selection\"] p:last-child")).Text;
+
+                    Logger.LogTrace($"Clicked '{color}' button");
 
                     Logger.LogTrace($"Color: {color}");
 
@@ -120,19 +162,139 @@ namespace Data.Specialized.Pages
 
                     var pricing = GetPricing();
 
+                    // TODO: Move this to a color only loop as we don't need images for each color/size combination (I think)
                     var images = GetImages();
-
-                    // TODO: Fix this slow running process
-                    //var geometry = GetGeometry(size);
-                    Geometry geometry = default;
 
                     var modelConfiguration = new ModelConfiguration(partNumber, pricing, color, images, size, geometry);
 
                     modelConfigurations.Add(modelConfiguration);
                 }
             }
-
+            
             return modelConfigurations;
+        }
+
+        private Geometry GetGeometryFromGeometryTable(string size, GeometryTable geometryTable)
+        {
+            Logger.LogTrace($"Getting geometry from the geometry table object for '{size}'");
+
+            var geometryTableRows = geometryTable.GeometryTableRows;
+
+            var dimensions = new Dictionary<Dimension, string>();
+
+            foreach (var geometryTableRow in geometryTableRows)
+            {
+                var dimension = new Dimension(geometryTableRow.DimensionName, geometryTableRow.ImageUrl);
+
+                Logger.LogTrace($"Dimension Name: {dimension.Name}");
+                Logger.LogTrace($"Dimension Image URL: {dimension.ImageUrl}");
+
+                var sizeAndValuePairs =
+                    geometryTableRow.SizeAndValuePairs.Where(svp =>
+                        svp.Key.Equals(size, StringComparison.OrdinalIgnoreCase));
+
+                foreach (var (key, value) in sizeAndValuePairs)
+                {
+                    Logger.LogTrace($"Key (Size): {key}");
+                    Logger.LogTrace($"Value: {value}");
+
+                    dimensions.Add(dimension, value);
+                }
+            }
+
+            var geometry = new Geometry(dimensions);
+
+            return geometry;
+        }
+
+        private GeometryTable GetGeometryTable()
+        {
+            Logger.LogTrace("Getting geometry for each size");
+
+            Logger.LogTrace("Expanding the 'Geometry' accordion item");
+
+            // Expand the "Geometry" accordion item
+            TechnicalSpecificationsAccordion.FindElements(By.TagName("h3")).Single(x =>
+                x.Text.Trim().Equals("Geometry", StringComparison.OrdinalIgnoreCase)).Click();
+
+            Logger.LogTrace("Getting 'th' text values to determine which column to read");
+
+            var geometryTableHead = TechnicalSpecificationsAccordion.FindElement(By.TagName("thead"));
+            var columnHeaderValues = geometryTableHead
+                .FindElements(By.TagName("th")).Select(x => x.Text.Trim()).ToList();
+
+            var geometryTableBody = TechnicalSpecificationsAccordion.FindElement(By.TagName("tbody"));
+            var rows = geometryTableBody.FindElements(By.TagName("tr"));
+
+            Logger.LogTrace("Scraping dimensions from table rows");
+
+            var geometryTableRows = new List<GeometryTableRow>();
+
+            foreach (var row in rows)
+            {
+                var rowIndex = rows.IndexOf(row);
+
+                try
+                {
+                    var geometryTableRow = GetGeometryTableRow(row, rowIndex, columnHeaderValues);
+                    geometryTableRows.Add(geometryTableRow);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError(e, "Failed to get dimensions from row");
+                }
+            }
+
+            var geometryTable = new GeometryTable(geometryTableRows);
+            
+            return geometryTable;
+        }
+
+        // TODO: Add scraping of the image URL for the dimension visual aid
+        private GeometryTableRow GetGeometryTableRow(IWebElement row, int rowIndex,
+            List<string> columnHeaderValues)
+        {
+            ArgumentNullException.ThrowIfNull(row);
+
+            Logger.LogTrace($"Getting dimension from row #{rowIndex}");
+
+            Logger.LogTrace($"Scrolling to '{nameof(row)}' (#{rowIndex})");
+
+            WebDriver.ScrollToElement(row);
+
+            var columns = row.FindElements(By.CssSelector("td"));
+
+            if (columns is null)
+                throw new NullReferenceException($"'{nameof(columns)}' cannot be null");
+
+            // Throw an exception if any td elements have a colspan or rowspan set as it would cause misinterpretation of values
+            ThrowIfTableLayoutIsUnexpected(columns);
+
+            Logger.LogTrace($"Getting dimension from row #{rowIndex}");
+
+            var dimensionName = columns.First().Text.Trim();
+            Logger.LogTrace($"Dimension Name: {dimensionName}");
+
+            var valueColumns = columns.Skip(1);
+
+            var values = new Dictionary<string, string>();
+
+            foreach (var valueColumn in valueColumns)
+            {
+                var columnIndex = columns.IndexOf(valueColumn);
+                var size = columnHeaderValues.ElementAt(columnIndex);
+                
+                var dimensionValue = valueColumn.Text.Trim();
+                Logger.LogTrace($"Dimension Value: {dimensionValue}");
+
+                values.Add(size, dimensionValue);
+            }
+
+            var imageUrl = WebDriver.FindElement(By.CssSelector("img[alt=\"Geometry\"]")).GetAttribute("src");
+
+            var geometryTableRow = new GeometryTableRow(dimensionName, values, imageUrl);
+
+            return geometryTableRow;
         }
 
         private void WaitForPageToLoad()
@@ -149,58 +311,15 @@ namespace Data.Specialized.Pages
             Logger.LogTrace($"Page loaded after '{stopwatch.Elapsed}'");
         }
 
-        private Geometry GetGeometry(SpecializedBikeSize size)
-        {
-            Logger.LogTrace($"Getting geometry for '{size}'");
-
-            Logger.LogTrace("Expanding the 'Geometry' accordion item");
-
-            // Expand the "Geometry" accordion item
-            TechnicalSpecificationsAccordion.FindElements(By.TagName("h3")).Single(x =>
-                x.Text.Trim().Equals("Geometry", StringComparison.OrdinalIgnoreCase)).Click();
-
-            Logger.LogTrace("Getting 'th' text values to determine which column to read");
-
-            var geometryTableHead = TechnicalSpecificationsAccordion.FindElement(By.TagName("thead"));
-            var columnHeaderValues = geometryTableHead
-                .FindElements(By.TagName("th")).Select(x => x.Text.Trim()).ToList();
-            var focusedColumnIndex = columnHeaderValues.IndexOf(size.ToString());
-            
-            var geometryTableBody = TechnicalSpecificationsAccordion.FindElement(By.TagName("tbody"));
-            var rows = geometryTableBody.FindElements(By.TagName("tr"));
-
-            var dimensions = new Dictionary<string, string>();
-
-            Logger.LogTrace("Scraping dimensions from table rows");
-
-            foreach (var row in rows)
-            {
-                var rowIndex = rows.IndexOf(row);
-
-                try
-                {
-                    GetDimensionFromRow(row, focusedColumnIndex, dimensions, rowIndex, size);
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError(e, "Failed to get dimension from row");
-                }
-            }
-
-            var geometry = new Geometry(size, dimensions);
-
-            return geometry;
-        }
-
         private void GetDimensionFromRow(IWebElement row, int focusedColumnIndex, Dictionary<string, string> dimensions,
-            int rowIndex, SpecializedBikeSize size)
+            int rowIndex, string size)
         {
             ArgumentNullException.ThrowIfNull(row);
 
             Logger.LogTrace($"Getting dimension from row #{rowIndex}");
 
             Logger.LogTrace($"Scrolling to '{nameof(row)}' (#{rowIndex})");
-            
+
             WebDriver.ScrollToElement(row);
 
             var columns = row.FindElements(By.TagName("td"));
@@ -218,7 +337,7 @@ namespace Data.Specialized.Pages
 
             var key = columns.First().Text.Trim();
             Logger.LogTrace($"Name: {key}");
-            
+
             var value = columns.ElementAt(focusedColumnIndex).Text.Trim();
             Logger.LogTrace($"Value: {value}");
 
@@ -263,7 +382,7 @@ namespace Data.Specialized.Pages
                     var attributeValue = column.GetAttribute(attribute);
                     var isSet = !string.IsNullOrWhiteSpace(attributeValue);
 
-                    bool isInvalidValue = false;
+                    var isInvalidValue = false;
 
                     if (isSet)
                     {
@@ -419,29 +538,6 @@ namespace Data.Specialized.Pages
             Modal.FindElement(By.CssSelector(closeButtonCssSelector)).Click();
 
             return description;
-        }
-
-        private void ThrowIfPageSourceContainsElementWithAnySelectors(List<string> cssSelectors)
-        {
-            var html = WebDriver.PageSource;
-
-            var stringBuilder = new StringBuilder();
-
-            stringBuilder.AppendLine(
-                "Checking page source for the presence of elements with a selector matching any of the following:");
-            foreach (var cssSelector in cssSelectors)
-            {
-                stringBuilder.AppendLine($"    - \"{cssSelector}\"");
-            }
-
-            var message = stringBuilder.ToString();
-            Logger.LogTrace(message);
-
-            foreach (var cssSelector in cssSelectors)
-            {
-                if (html.Contains(cssSelector))
-                    throw new Exception($"Source code contains element with the '{cssSelector}' selector");
-            }
         }
     }
 }

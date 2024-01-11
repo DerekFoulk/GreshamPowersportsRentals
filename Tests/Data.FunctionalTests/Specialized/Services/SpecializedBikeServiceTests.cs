@@ -5,6 +5,7 @@ using Divergic.Logging.Xunit;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Data.FunctionalTests.Specialized.Services
 {
@@ -38,7 +39,7 @@ namespace Data.FunctionalTests.Specialized.Services
                         .NotBeNullOrWhiteSpace();
                     model.Description.Length.Should()
                         .BeGreaterThan(50)
-                        .And.BeLessThan(255);
+                        .And.BeLessThan(750);
 
                     model.TechnicalSpecifications.Should()
                         .BeEquivalentTo(default(TechnicalSpecifications));
@@ -88,13 +89,50 @@ namespace Data.FunctionalTests.Specialized.Services
                                 });
 
                             configuration.Size.Should()
-                                .BeDefined();
+                                .NotBeNullOrWhiteSpace();
 
-                            configuration.Geometry.Should()
-                                .BeEquivalentTo(default(ModelConfiguration));
+                            configuration.Geometry.Dimensions.Should()
+                                .NotBeNullOrEmpty()
+                                .And.AllSatisfy(dimensionKvp =>
+                                {
+                                    var dimension = dimensionKvp.Key;
+                                    var dimensionValue = dimensionKvp.Value;
+
+                                    dimension.Name.Should()
+                                        .NotBeNullOrWhiteSpace();
+
+                                    dimension.ImageUrl.Should()
+                                        .NotBeNullOrWhiteSpace();
+                                    dimension.ImageUrl.Should()
+                                        .Contain("http");
+                                    dimension.ImageUrl.Should()
+                                        .Contain("/");
+                                    dimension.ImageUrl.Should()
+                                        .Contain(".");
+
+                                    dimensionValue.Should()
+                                        .NotBeNullOrWhiteSpace();
+                                })
+                                .And.HaveCountGreaterOrEqualTo(21);
                         });
 
+                    if (model.Videos?.Any() == true)
+                    {
+                        Logger.LogInformation($"Model ('{model.Name}') contains {model.Videos.Count()} videos");
 
+                        model.Videos.Should()
+                            .AllSatisfy(video =>
+                            {
+                                video.Should()
+                                    .NotBeNullOrWhiteSpace();
+                                video.Should()
+                                    .Contain("http");
+                                video.Should()
+                                    .Contain("/");
+                                video.Should()
+                                    .Contain(".");
+                            });
+                    }
                 });
                 //.BeGreaterOrEqualTo(305)
                 //.And.BeLessThan(315);

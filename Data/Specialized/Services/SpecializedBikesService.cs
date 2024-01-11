@@ -23,30 +23,22 @@ namespace Data.Specialized.Services
 
             var bikes = new List<Model>();
 
-            var webDriver = _webDriverFactory.GetWebDriver<EdgeDriver>(TimeSpan.FromSeconds(5), false);
+            var webDriver = _webDriverFactory.GetWebDriver<EdgeDriver>(TimeSpan.FromSeconds(5), true);
 
             try
             {
                 var bikesPage = new BikesPage(_logger, webDriver);
                 
-                var urls = bikesPage.GetBikeDetailUrlsAcrossPages().Distinct();
+                var urls = bikesPage.GetBikeDetailUrlsAcrossPages().Distinct().ToList();
 
-                var scrapedBikesCount = 0;
-
-                foreach (var url in urls)
+                foreach (var url in urls.Where(x => urls.IndexOf(x) == 1))
                 {
-                    // TODO: Remove
-                    if (scrapedBikesCount >= 2)
-                        break;
-                    
                     webDriver.Navigate().GoToUrl(url);
 
                     var bikeDetailsPage = new BikeDetailsPage(_logger, webDriver);
                     var bikeDetails = bikeDetailsPage.GetBikeDetails();
 
                     bikes.Add(bikeDetails);
-
-                    scrapedBikesCount++;
                 }
             }
             finally

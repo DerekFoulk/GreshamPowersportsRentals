@@ -1,4 +1,4 @@
 ﻿namespace Data.Specialized.Models
 {
-    public record Geometry(SpecializedBikeSize Size, Dictionary<string, string> Dimensions);
+    public record Geometry(Dictionary<Dimension, string> Dimensions);
 }

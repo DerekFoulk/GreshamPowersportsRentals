@@ -1,7 +1,7 @@
 ﻿using BlazorApp.Shared.Exceptions;
 using BlazorApp.Shared.Extensions;
 using Data.Exceptions;
-using Data.Husqvarna.Pages.Shared;
+using Data.Pages;
 using OpenQA.Selenium;
 using SeleniumExtras.PageObjects;
 
@@ -9,7 +9,7 @@ namespace Data.Extensions
 {
     public static class PageExtensions
     {
-        public static By? GetByFrom<T>(this Page<T> page, string propertyName) where T : Page<T>
+        public static By? GetByFrom<T>(this BasePage<T> page, string propertyName) where T : BasePage<T>
         {
             How how;
             string? usingStr;
