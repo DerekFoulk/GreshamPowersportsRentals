@@ -57,7 +57,7 @@
                         <h2>Type of Bike</h2>
                     </div>
                     <div class="col-12">
-                        <CategorySelector SelectedCategoryChanged="OnSelectedCategoryChanged" />
+                        <CategorySelector />
                     </div>
                     <div class="col-12">
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -98,11 +98,6 @@
             throw new NullReferenceException($"{nameof(Rental)} ({typeof(Rental).FullName}) cannot be null");
 
         Logger.LogInformation($"{nameof(BlazorApp.Shared.Rental)} #{Rental.Id} ({Rental.StartDate}-{Rental.EndDate}) submitted @ {DateTime.Now}");
-    }
-
-    private void OnSelectedCategoryChanged(Category category)
-    {
-        StateHasChanged();
     }
 
 }
