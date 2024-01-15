@@ -1,10 +1,11 @@
 ﻿@using BlazorApp.Shared
+@using System.Runtime.InteropServices.JavaScript
 
 @inject HttpClient Http
 
 @inject ILogger<ModelSelector> Logger
 
-<div class="row g-3">
+<div class="row g-3" id="model-selector">
     @foreach (var model in _models)
     {
         <div class="col-12">
@@ -19,6 +20,12 @@
     [Parameter]
     [EditorRequired]
     public Category? Category { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSHost.ImportAsync(nameof(ModelSelector),
+            $"../Shared/{nameof(ModelSelector)}.razor.js");
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -38,6 +45,12 @@
         {
             Logger.LogError(e, "Failed to load models");
         }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (_models.Any())
+            ScrollToModelSelector();
     }
 
 }
