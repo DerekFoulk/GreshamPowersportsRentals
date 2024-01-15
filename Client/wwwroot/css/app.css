@@ -146,3 +146,11 @@ article {
 .text-bg-primary {
     background-color: var(--bs-primary) !important;
 }
+
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-left-color: rgba(0, 0, 0, 0.1);
+    border-top-color: rgba(0, 0, 0, 0.1);
+    border-right-color: rgba(0, 0, 0, 0.175);
+    border-bottom-color: rgba(0, 0, 0, 0.175);
+}

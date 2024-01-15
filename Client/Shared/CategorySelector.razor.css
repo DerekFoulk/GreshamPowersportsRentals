@@ -1,15 +1,17 @@
-﻿::deep .card {
-    min-height: 150px !important;
-}
+﻿@media (min-width: 768px) {
+    ::deep .card {
+        min-height: 150px !important;
+    }
 
-::deep .card-body {
-    padding-top: 0;
-    padding-bottom: 0;
-}
+    ::deep .card-body {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
 
-.center-vertically {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 150px;
+    .center-vertically {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 150px;
+    }
 }

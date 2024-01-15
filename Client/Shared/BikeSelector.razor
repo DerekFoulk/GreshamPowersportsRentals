@@ -1,49 +1,54 @@
 ﻿
-@if (Sizes is null)
-{
-    <Spinner />
-}
-else
-{
-    var id = $"size-input-{IdSuffix}";
-
-    <label for="@id" class="form-label">Size</label>
-    <InputSelect TValue="string"
-                 Value="SelectedSize"
-                 ValueChanged="OnSizeChangedAsync"
-                 ValueExpression="@(() => SelectedSize)"
-                 id="@id"
-                 class="form-select"
-                 aria-label="Size Selector">
-        @foreach (var size in Sizes)
+<div class="row row-cols-1 g-3">
+    <div class="col">
+        @if (Sizes is null)
         {
-            <option value="@size">@size</option>
+            <Spinner/>
         }
-    </InputSelect>
-}
-
-@if (Colors is null)
-{
-    <Spinner />
-}
-else
-{
-    var id = $"color-input-{IdSuffix}";
-
-    <label for="@id" class="form-label">Color</label>
-    <InputSelect TValue="string"
-                 Value="SelectedColor"
-                 ValueChanged="OnColorChangedAsync"
-                 ValueExpression="@(() => SelectedColor)"
-                 id="@id"
-                 class="form-select"
-                 aria-label="Color Selector">
-        @foreach (var color in Colors)
+        else
         {
-            <option value="@color">@color</option>
+            var id = $"size-input-{IdSuffix}";
+
+            <label for="@id" class="form-label">Size</label>
+            <InputSelect TValue="string"
+                         Value="SelectedSize"
+                         ValueChanged="OnSizeChangedAsync"
+                         ValueExpression="@(() => SelectedSize)"
+                         id="@id"
+                         class="form-select"
+                         aria-label="Size Selector">
+                @foreach (var size in Sizes)
+                {
+                    <option value="@size">@size</option>
+                }
+            </InputSelect>
         }
-    </InputSelect>
-}
+    </div>
+    <div class="col">
+        @if (Colors is null)
+        {
+            <Spinner/>
+        }
+        else
+        {
+            var id = $"color-input-{IdSuffix}";
+
+            <label for="@id" class="form-label">Color</label>
+            <InputSelect TValue="string"
+                         Value="SelectedColor"
+                         ValueChanged="OnColorChangedAsync"
+                         ValueExpression="@(() => SelectedColor)"
+                         id="@id"
+                         class="form-select"
+                         aria-label="Color Selector">
+                @foreach (var color in Colors)
+                {
+                    <option value="@color">@color</option>
+                }
+            </InputSelect>
+        }
+    </div>
+</div>
 
 @code {
     [CascadingParameter]

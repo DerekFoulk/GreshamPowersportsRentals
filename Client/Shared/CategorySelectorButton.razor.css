@@ -10,4 +10,6 @@ a:hover img {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center center;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
 }

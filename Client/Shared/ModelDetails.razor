@@ -19,8 +19,8 @@ else
                         <Tab Title="Summary"
                              IsActive="true">
                             <Content>
-                                <div class="row g-3 p-3">
-                                    <div class="col-12 col-md-6">
+                                <div class="row row-cols-1 row-cols-lg-2 g-3 p-3">
+                                    <div class="col">
                                         @if (SelectedBike is null)
                                         {
                                             <Spinner/>
@@ -32,7 +32,7 @@ else
                                             <img class="img-fluid" src="@SelectedBike.Images.First()" alt="@alt"/>
                                         }
                                     </div>
-                                    <div class="col-12 col-md-6">
+                                    <div class="col">
                                         @Model.Description
                                     </div>
                                 </div>
@@ -49,33 +49,47 @@ else
                 </div>
                 <div class="col-sm-6 col-md-3 col-xl-2">
                     <ul class="list-group">
+                        @{
+                            var idSuffix = Guid.NewGuid().ToString("N");
+                            var helmetId = $"helmet-checkbox-{idSuffix}";
+                            var lockId = $"lock-checkbox-{idSuffix}";
+                        }
                         <li class="list-group-item text-center text-bg-dark">
                             <span class="h3 align-middle">Extras</span>
                         </li>
                         <li class="list-group-item">
-                            <input class="form-check-input me-1" type="checkbox" value="" id="firstCheckboxStretched">
-                            <label class="form-check-label stretched-link" for="firstCheckboxStretched">Helmet</label>
+                            <input class="form-check-input me-1" type="checkbox" value="" id="@helmetId">
+                            <label class="form-check-label stretched-link" for="@helmetId">Helmet</label>
                             <span class="text-success fw-bolder float-end">$0.00</span>
                         </li>
                         <li class="list-group-item">
-                            <input class="form-check-input me-1" type="checkbox" value="" id="secondCheckboxStretched">
-                            <label class="form-check-label stretched-link" for="secondCheckboxStretched">Lock</label>
+                            <input class="form-check-input me-1" type="checkbox" value="" id="@lockId">
+                            <label class="form-check-label stretched-link" for="@lockId">Lock</label>
                             <span class="text-success fw-bolder float-end">$0.00</span>
                         </li>
                     </ul>
                 </div>
                 <div class="col-sm-6 col-md-3 col-xl-2 text-center">
-                    <div class="row g-3">
-                        <div class="col-12">
+                    <div class="row row-cols-1 g-3">
+                        <div class="col">
                             <span class="h1 d-block">@Price?.ToString("C")</span>
                             <small class="text-muted d-block"><em>@(Model.PricePerDay.ToString("C"))/day</em></small>
                             <small class="text-muted d-block"><em>@(Model.PricePerWeek.ToString("C"))/week</em></small>
                         </div>
-                        <div class="col-12">
+                        <div class="col">
                             <CascadingValue Value="Model">
                                 <BikeSelector SelectedBikeChanged="OnSelectedBikeChanged" />
                                 @* <SizeSelector /> *@
                             </CascadingValue>
+                        </div>
+                        <div class="col">
+                            <div class="d-grid gap-3">
+                                <Button Type="ButtonType.Button"
+                                        Color="ButtonColor.Primary">
+                                    <Icon Name="IconName.CartPlus"/>
+                                    Add to Cart
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
