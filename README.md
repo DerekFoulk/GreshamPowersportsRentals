@@ -1,3 +1,5 @@
+[![Azure Static Web Apps CI/CD](https://github.com/DerekFoulk/GreshamPowersportsRentals/actions/workflows/azure-static-web-apps-salmon-plant-03316351e.yml/badge.svg)](https://github.com/DerekFoulk/GreshamPowersportsRentals/actions/workflows/azure-static-web-apps-salmon-plant-03316351e.yml)
+
 # Blazor Starter Application
 
 This template contains an example .NET 7 [Blazor WebAssembly](https://docs.microsoft.com/aspnet/core/blazor/?view=aspnetcore-6.0#blazor-webassembly) client application, a .NET 7 C# [Azure Functions](https://docs.microsoft.com/azure/azure-functions/functions-overview), and a C# class library with shared code.
