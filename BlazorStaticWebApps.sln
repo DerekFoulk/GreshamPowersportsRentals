@@ -9,13 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api", "Api\Api.csproj", "{CEF28A6B-A047-4153-A4E0-5A2A921B432E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "Data\Data.csproj", "{28A098FE-BAED-43B1-BEC7-2F50525A48CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data", "Data\Data.csproj", "{28A098FE-BAED-43B1-BEC7-2F50525A48CB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F2E4DB93-F395-4ADE-8340-DB52D0DEC1A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data.FunctionalTests", "Tests\Data.FunctionalTests\Data.FunctionalTests.csproj", "{59D170CA-F633-4924-850E-478563061D83}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.FunctionalTests", "Tests\Data.FunctionalTests\Data.FunctionalTests.csproj", "{59D170CA-F633-4924-850E-478563061D83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data.UnitTests", "Tests\Data.UnitTests\Data.UnitTests.csproj", "{84C00642-90D4-4509-8682-B102FC1205BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.UnitTests", "Tests\Data.UnitTests\Data.UnitTests.csproj", "{84C00642-90D4-4509-8682-B102FC1205BC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

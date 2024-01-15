@@ -1,1 +1,15 @@
-﻿
+﻿::deep .card {
+    min-height: 150px !important;
+}
+
+::deep .card-body {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.center-vertically {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 150px;
+}

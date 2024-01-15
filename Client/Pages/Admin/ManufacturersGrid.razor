@@ -1,0 +1,34 @@
+@inject HttpClient Http
+
+<Grid TItem="Manufacturer" class="table table-hover table-bordered table-striped"
+      DataProvider="ManufacturersDataProviderAsync"
+      Responsive="true">
+    <GridColumn TItem="Manufacturer" HeaderText="Id" PropertyName="Id">
+        <span class="d-inline-block text-truncate" style="max-width: 90px;">
+            @context.Id
+        </span>
+    </GridColumn>
+    <GridColumn TItem="Manufacturer" HeaderText="Name" PropertyName="Name">
+        @context.Name
+    </GridColumn>
+</Grid>
+
+@code {
+    protected IEnumerable<Manufacturer>? Manufacturers { get; set; }
+
+    private async Task<GridDataProviderResult<Manufacturer>> ManufacturersDataProviderAsync(GridDataProviderRequest<Manufacturer> request)
+    {
+        Manufacturers ??= await GetManufacturersAsync();
+
+        return await Task.FromResult(request.ApplyTo(Manufacturers));
+    }
+
+    private async Task<IOrderedEnumerable<Manufacturer>> GetManufacturersAsync()
+    {
+        var manufacturers = await Http.GetFromJsonAsync<Manufacturer[]>("/api/Manufacturers") ?? new Manufacturer[] { };
+        var sorted = manufacturers
+            .OrderBy(x => x.Name);
+
+        return sorted;
+    }
+}

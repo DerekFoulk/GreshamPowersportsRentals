@@ -1,4 +1,5 @@
 ﻿@inject HttpClient Http
+@inject ILogger<BikesGrid> Logger
 
 <Grid TItem="Bike" class="table table-hover table-bordered table-striped"
       DataProvider="BikesDataProviderAsync"
@@ -32,16 +33,24 @@
         return await Task.FromResult(request.ApplyTo(Bikes));
     }
 
-    private async Task<IOrderedEnumerable<Bike>> GetBikesAsync()
+    private async Task<IEnumerable<Bike>> GetBikesAsync()
     {
         var bikes = await Http.GetFromJsonAsync<Bike[]>("/api/Bikes") ?? new Bike[] { };
 
-        var sorted = bikes
-            .OrderBy(x => x.Model.Manufacturer.Name)
-            .ThenBy(x => x.Model.Name)
-            .ThenBy(x => x.Size)
-            .ThenByDescending(x => x.IsAvailable);
+        try
+        {
+            var sorted = bikes
+                .OrderBy(x => x.Model.Name)
+                .ThenBy(x => x.Size)
+                .ThenByDescending(x => x.IsAvailable);
 
-        return sorted;
+            return sorted;
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Failed to sort bikes");
+
+            return bikes;
+        }
     }
 }

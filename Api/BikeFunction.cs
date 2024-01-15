@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -24,7 +25,16 @@ namespace Api
 
             var response = req.CreateResponse(HttpStatusCode.OK);
 
-            await response.WriteAsJsonAsync(result);
+            try
+            {
+                await response.WriteAsJsonAsync(result);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to write response as JSON");
+
+                throw;
+            }
 
             return response;
         }

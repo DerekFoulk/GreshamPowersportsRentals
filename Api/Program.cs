@@ -11,7 +11,7 @@ namespace Api
                 .ConfigureFunctionsWorkerDefaults()
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.AddSingleton<IDatastore, FakeDatastore>();
+                    services.AddSingleton<IDatastore, JsonDatastore>();
                 })
                 .Build();
 

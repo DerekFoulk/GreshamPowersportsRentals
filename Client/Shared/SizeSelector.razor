@@ -9,7 +9,7 @@ else
         @foreach (var size in AvailableSizes)
         {
             <div class="col-12">
-                <SizeQtySelector Size="size" />
+                <SizeQtySelector Size="@size" />
             </div>
         }
     </div>
@@ -20,26 +20,23 @@ else
     [EditorRequired]
     public Model? Model { get; set; }
 
-    protected IEnumerable<BikeSize>? AvailableSizes { get; set; }
+    protected IEnumerable<string>? AvailableSizes { get; set; }
 
     protected override void OnInitialized()
     {
         AvailableSizes = GetAvailableSizes();
     }
 
-    private IEnumerable<BikeSize>? GetAvailableSizes()
+    private IEnumerable<string>? GetAvailableSizes()
     {
         if (Model is null)
             return null;
 
-        var sizes = Enum.GetValues<BikeSize>();
+        var bikes = Model.Bikes;
+        var sizes = bikes.Select(x => x.Size);
+        var availableSizes = sizes.Distinct();
 
-        var availableSizes = Model.Bikes
-            .Select(x => x.Size)
-            .Distinct();
-
-        var sorted = availableSizes.OrderBy(s => Array.IndexOf(sizes, s))
-            .ThenBy(s => s);
+        var sorted = availableSizes.OrderBy(s => s);
 
         return sorted;
     }

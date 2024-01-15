@@ -1,15 +1,18 @@
 ﻿using Data.Factories;
 using Data.Husqvarna.Services;
+using Data.Options;
 using Divergic.Logging.Xunit;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Moq;
 using Xunit.Abstractions;
 
 namespace Data.FunctionalTests.Husqvarna.Services
 {
     public class HusqvarnaBicyclesServiceTests : LoggingTestsBase<HusqvarnaBicyclesService>
     {
-        public HusqvarnaBicyclesServiceTests(ITestOutputHelper output) : base(output, LogLevel.Debug)
+        public HusqvarnaBicyclesServiceTests(ITestOutputHelper output) : base(output, LogLevel.Trace)
         {
         }
 
@@ -18,7 +21,15 @@ namespace Data.FunctionalTests.Husqvarna.Services
         {
             // Arrange
             var webDriverFactory = new WebDriverFactory();
-            var husqvarnaBicyclesService = new HusqvarnaBicyclesService(Logger, webDriverFactory);
+            var mockOptionsSnapshot = new Mock<IOptionsSnapshot<WebDriverOptions>>();
+            var webDriverOptions = new WebDriverOptions
+            {
+                Headless = false,
+                ImplicitWaitInSeconds = 3
+            };
+            mockOptionsSnapshot.Setup(x => x.Value)
+                .Returns(webDriverOptions);
+            var husqvarnaBicyclesService = new HusqvarnaBicyclesService(Logger, mockOptionsSnapshot.Object, webDriverFactory);
 
             // Act
             var models = husqvarnaBicyclesService.GetBicycleInfos();

@@ -5,8 +5,8 @@
 <div class="row g-3 mb-3">
     <div class="col-md-2">
         <Card Color="CardColor.Primary">
-            <CardBody Class="py-md-5">
-                <strong>Choose a category to see the available models</strong>
+            <CardBody>
+                <strong class="center-vertically">Choose a category to see the available models</strong>
             </CardBody>
         </Card>
     </div>
@@ -21,9 +21,12 @@
     }
 </div>
 
-<BikeSelector Category="@SelectedCategory" />
+<ModelSelector Category="@SelectedCategory" />
 
 @code {
+    [Parameter]
+    public EventCallback<Category> SelectedCategoryChanged { get; set; }
+
     private Category[] _categories = { };
 
     protected Category? SelectedCategory { get; set; }
@@ -46,5 +49,7 @@
             return;
 
         SelectedCategory = category;
+
+        SelectedCategoryChanged.InvokeAsync(category);
     }
 }

@@ -11,5 +11,9 @@ public enum BikeType
     [Display(Name = "Road Bikes")]
     Road,
     [Display(Name = "Demo Bikes")]
-    Demo
+    Demo,
+    [Display(Name = "Active Bikes")]
+    Active,
+    [Display(Name = "Kids' Bikes")]
+    Kids
 }

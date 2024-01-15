@@ -1,25 +1,30 @@
-﻿<Grid TItem="BikeSize" class="table table-hover table-bordered table-striped"
+﻿@inject HttpClient Http
+
+<Grid TItem="string" class="table table-hover table-bordered table-striped"
       DataProvider="BikeSizesDataProviderAsync"
       Responsive="true">
-    <GridColumn TItem="BikeSize" HeaderText="Size">
-        @context (@context.GetDisplayName())
+    <GridColumn TItem="string" HeaderText="Size">
+        @context
     </GridColumn>
 </Grid>
 
 @code {
-    protected IEnumerable<BikeSize>? BikeSizes { get; set; }
+    protected IEnumerable<string>? BikeSizes { get; set; }
 
-    private async Task<GridDataProviderResult<BikeSize>> BikeSizesDataProviderAsync(GridDataProviderRequest<BikeSize> request)
+    private async Task<GridDataProviderResult<string>> BikeSizesDataProviderAsync(GridDataProviderRequest<string> request)
     {
-        BikeSizes ??= GetBikeSizes();
+        BikeSizes ??= await GetBikeSizes();
 
         return await Task.FromResult(request.ApplyTo(BikeSizes));
     }
 
-    private IEnumerable<BikeSize> GetBikeSizes()
+    private async Task<IEnumerable<string>> GetBikeSizes()
     {
-        var bikeSizes = Enum.GetValues<BikeSize>();
+        var bikes = (await Http.GetFromJsonAsync<Bike[]>("/api/Bikes") ?? new Bike[] { }).ToList();
+        var bikeSizes = bikes.Select(x => x.Size).Distinct(StringComparer.OrdinalIgnoreCase);
+        
+        var sorted = bikeSizes.OrderBy(x => x);
 
-        return bikeSizes;
+        return sorted;
     }
 }

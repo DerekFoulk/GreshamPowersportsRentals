@@ -1,7 +1,10 @@
 ﻿using Data.Factories;
 using Data.Husqvarna.Models;
 using Data.Husqvarna.Pages;
+using Data.Options;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Edge;
 
 namespace Data.Husqvarna.Services
@@ -9,24 +12,40 @@ namespace Data.Husqvarna.Services
     public class HusqvarnaBicyclesService
     {
         private readonly ILogger<HusqvarnaBicyclesService> _logger;
+        private readonly WebDriverOptions _webDriverOptions;
         private readonly IWebDriverFactory _webDriverFactory;
 
-        public HusqvarnaBicyclesService(ILogger<HusqvarnaBicyclesService> logger, IWebDriverFactory webDriverFactory)
+        public HusqvarnaBicyclesService(ILogger<HusqvarnaBicyclesService> logger, IOptionsSnapshot<WebDriverOptions> optionsSnapshot, IWebDriverFactory webDriverFactory)
         {
             _logger = logger;
+            _webDriverOptions = optionsSnapshot.Value;
             _webDriverFactory = webDriverFactory;
         }
 
         public List<HusqvarnaBicycleInfo> GetBicycleInfos()
         {
-            var webDriver = _webDriverFactory.GetWebDriver<EdgeDriver>(TimeSpan.FromSeconds(3), true);
+            _logger.LogTrace("Getting bikes from Husqvarna's website");
+
+            var webDriver = _webDriverFactory.GetWebDriver<EdgeDriver>(
+                TimeSpan.FromSeconds(_webDriverOptions.ImplicitWaitInSeconds), _webDriverOptions.Headless);
 
             var bicycleInfos = new List<HusqvarnaBicycleInfo>();
 
             try
             {
                 var homePage = new HomePage(_logger, webDriver);
-                var modelMenuItems = homePage.MainMenuElement.GetModelMenuItems();
+
+                List<IWebElement> modelMenuItems;
+                try
+                {
+                    modelMenuItems = homePage.MainMenuElement.GetModelMenuItems();
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Failed to get menu items in 'Models'");
+
+                    throw;
+                }
 
                 _logger.LogTrace($"Scraped '{modelMenuItems.Count}' models from the menu");
 

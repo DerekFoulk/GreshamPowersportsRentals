@@ -19,16 +19,29 @@ else
                         <Tab Title="Summary"
                              IsActive="true">
                             <Content>
-                                <div class="p-3">
-                                    <img class="product-image float-start me-3 mb-3" src="https://placehold.co/350x250?text=@(HttpUtility.UrlEncode(Model.Name))" alt="@Model.Name"/>
-                                    @Model.Description
+                                <div class="row g-3 p-3">
+                                    <div class="col-12 col-md-6">
+                                        @if (SelectedBike is null)
+                                        {
+                                            <Spinner/>
+                                        }
+                                        else
+                                        {
+                                            var alt = $"{SelectedBike.Size} {Model.Name} ({SelectedBike.Color})";
+
+                                            <img class="img-fluid" src="@SelectedBike.Images.First()" alt="@alt"/>
+                                        }
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        @Model.Description
+                                    </div>
                                 </div>
                             </Content>
                         </Tab>
                         <Tab Title="Info">
                             <Content>
                                 <div class="p-3">
-                                    <p>More details can be found at <a href="https://www.specialized.com/us/en/rockhopper-expert/p/199626?color=319772-199626" target="_blank">https://www.specialized.com/us/en/rockhopper-expert/p/199626?color=319772-199626</a>.</p>
+                                    <p>Please call (503) 912-0493 for more info.</p>
                                 </div>
                             </Content>
                         </Tab>
@@ -55,18 +68,20 @@ else
                     <div class="row g-3">
                         <div class="col-12">
                             <span class="h1 d-block">@Price?.ToString("C")</span>
-                            <small class="text-muted d-block"><em>@(Model.PricePerHour.ToString("C"))/hr</em></small>
+                            <small class="text-muted d-block"><em>@(Model.PricePerDay.ToString("C"))/day</em></small>
+                            <small class="text-muted d-block"><em>@(Model.PricePerWeek.ToString("C"))/week</em></small>
                         </div>
                         <div class="col-12">
                             <CascadingValue Value="Model">
-                                <SizeSelector />
+                                <BikeSelector SelectedBikeChanged="OnSelectedBikeChanged" />
+                                @* <SizeSelector /> *@
                             </CascadingValue>
                         </div>
                     </div>
                 </div>
             </div>
         </CardBody>
-        </Card>
+    </Card>
 }
 
 @code {
@@ -78,34 +93,38 @@ else
     [EditorRequired]
     public Model? Model { get; set; }
 
+    public Bike? SelectedBike { get; set; }
+
     protected decimal? Price { get; set; }
 
     protected override void OnParametersSet()
     {
-        Price = CalculatePrice();
+        if (Model is null)
+            throw new NullReferenceException($"'{nameof(Model)}' cannot be null");
+
+        SelectedBike = Model.Bikes.First();
+
+        try
+        {
+            Price = CalculatePrice();
+        }
+        catch (Exception e)
+        {
+            Logger?.LogError(e, "Cannot calculate price");
+            
+            throw;
+        }
     }
 
-    private decimal? CalculatePrice()
+    private decimal CalculatePrice()
     {
         Logger?.LogTrace("Calculating price");
 
         if (Model is null)
-        {
-            var exception = new InvalidOperationException($"'{nameof(Model)}' must not be null");
-            
-            Logger?.LogError(exception, "Cannot calculate price");
-
-            throw exception;
-        }
+            throw new InvalidOperationException($"'{nameof(Model)}' must not be null");
 
         if (Rental is null)
-        {
-            var exception = new InvalidOperationException($"'{nameof(Rental)}' must not be null");
-
-            Logger?.LogError(exception, "Cannot calculate price");
-
-            throw exception;
-        }
+            throw new InvalidOperationException($"'{nameof(Rental)}' must not be null");
 
         var rentalStart = Rental.StartDate.ToDateTime(Rental.StartTime);
         var rentalEnd = Rental.EndDate.ToDateTime(Rental.EndTime);
@@ -117,14 +136,25 @@ else
 
         Logger?.LogTrace($"Duration: {duration}");
 
-        var hours = (decimal)duration.TotalHours;
-        var price = hours * Model.PricePerHour;
+        var days = (decimal)duration.TotalDays;
 
-        Logger?.LogTrace($"Bike Price per Hour: {Model.PricePerHour:C}");
+        if (days < 1)
+            days = 1;
+
+        var price = days * Model.PricePerDay;
+
+        Logger?.LogTrace($"Bike Price per Day: {Model.PricePerDay:C}");
 
         Logger?.LogTrace($"Price: {price:C}");
 
         return price;
+    }
+
+    private void OnSelectedBikeChanged(Bike bike)
+    {
+        SelectedBike = bike;
+
+        StateHasChanged();
     }
 
 }

@@ -63,8 +63,7 @@ public class FakeDatastore : IDatastore
 
         foreach (var bikeSize in bikeSizes)
         {
-            var displayName = bikeSize.GetDisplayName();
-            stringBuilder.AppendLine($"<li>{displayName}</li>");
+            stringBuilder.AppendLine($"<li>{bikeSize}</li>");
         }
 
         var html = stringBuilder.ToString();

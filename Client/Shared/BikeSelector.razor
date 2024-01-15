@@ -1,41 +1,113 @@
-﻿@using BlazorApp.Shared
+﻿
+@if (Sizes is null)
+{
+    <Spinner />
+}
+else
+{
+    var id = $"size-input-{IdSuffix}";
 
-@inject HttpClient Http
+    <label for="@id" class="form-label">Size</label>
+    <InputSelect TValue="string"
+                 Value="SelectedSize"
+                 ValueChanged="OnSizeChangedAsync"
+                 ValueExpression="@(() => SelectedSize)"
+                 id="@id"
+                 class="form-select"
+                 aria-label="Size Selector">
+        @foreach (var size in Sizes)
+        {
+            <option value="@size">@size</option>
+        }
+    </InputSelect>
+}
 
-@inject ILogger<BikeSelector> Logger
+@if (Colors is null)
+{
+    <Spinner />
+}
+else
+{
+    var id = $"color-input-{IdSuffix}";
 
-<div class="row g-3">
-    @foreach (var model in _models)
-    {
-        <div class="col-12">
-            <ModelDetails Model="@model" />
-        </div>
-    }
-</div>
+    <label for="@id" class="form-label">Color</label>
+    <InputSelect TValue="string"
+                 Value="SelectedColor"
+                 ValueChanged="OnColorChangedAsync"
+                 ValueExpression="@(() => SelectedColor)"
+                 id="@id"
+                 class="form-select"
+                 aria-label="Color Selector">
+        @foreach (var color in Colors)
+        {
+            <option value="@color">@color</option>
+        }
+    </InputSelect>
+}
 
 @code {
-    private Model[] _models = { };
+    [CascadingParameter]
+    public Model? Model { get; set; }
 
     [Parameter]
-    [EditorRequired]
-    public Category? Category { get; set; }
+    public EventCallback<Bike> SelectedBikeChanged { get; set; }
 
-    protected override async Task OnParametersSetAsync()
+    protected List<string>? Sizes { get; set; }
+
+    protected string? SelectedSize { get; set; }
+
+    protected List<string>? Colors { get; set; }
+
+    protected string? SelectedColor { get; set; }
+
+    protected string? IdSuffix => Model?.Id.ToString("N");
+
+    protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            var models = await Http.GetFromJsonAsync<Model[]>("/api/Models") ?? new Model[] { };
+        if (Model is null)
+            return;
 
-            var filteredModels = models
-                .Where(x => x.Category.Id.Equals(Category?.Id))
-                .ToArray();
+        var bike = Model.Bikes.First();
+        SelectedSize = bike.Size;
+        SelectedColor = bike.Color;
+        await SelectedBikeChanged.InvokeAsync(bike);
 
-            _models = filteredModels;
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Failed to load models");
-        }
+        var sizes = Model.Bikes.Select(x => x.Size).Distinct().ToList();
+        Sizes = sizes;
+
+        var colors = Model.Bikes.Select(x => x.Color).Distinct().ToList();
+        Colors = colors;
+    }
+
+    private async Task OnSizeChangedAsync(string size)
+    {
+        if (SelectedSize == size)
+            return;
+
+        SelectedSize = size;
+
+        await OnValuesChangedAsync();
+    }
+
+    private async Task OnColorChangedAsync(string color)
+    {
+        if (SelectedColor == color)
+            return;
+        
+        SelectedColor = color;
+
+        await OnValuesChangedAsync();
+    }
+
+    private async Task OnValuesChangedAsync()
+    {
+        if (Model is null)
+            return;
+
+        var bikes = Model.Bikes;
+        var bike = bikes.Single(x => x.Size.Equals(SelectedSize, StringComparison.OrdinalIgnoreCase) && x.Color.Equals(SelectedColor, StringComparison.OrdinalIgnoreCase));
+
+        await SelectedBikeChanged.InvokeAsync(bike);
     }
 
 }

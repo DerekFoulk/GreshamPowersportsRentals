@@ -21,7 +21,7 @@
 @code {
     [Parameter]
     [EditorRequired]
-    public BikeSize Size { get; set; }
+    public string? Size { get; set; }
 
     [Parameter]
     public int Qty { get; set; }
@@ -32,11 +32,9 @@
 
     protected override void OnInitialized()
     {
-        var sizeStr = Size.GetDisplayName();
-        
-        Label = sizeStr;
+        Label = Size;
 
-        Id = sizeStr.ToLowerInvariant().Replace(' ', '-');
+        Id = Size?.ToLowerInvariant().Replace(' ', '-');
     }
 
 }

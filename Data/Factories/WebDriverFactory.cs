@@ -67,7 +67,7 @@ namespace Data.Factories
                 throw new ArgumentOutOfRangeException(nameof(driverConfig), driverConfig, null);
 
             webDriver.Manage().Window.Position = new Point(2560, 0);
-            //webDriver.Manage().Window.Size = new Size(1920, 1080);
+            webDriver.Manage().Window.Size = new Size(1920, 1080);
             webDriver.Manage().Window.Maximize();
             webDriver.Manage().Timeouts().ImplicitWait = implicitWait;
 
