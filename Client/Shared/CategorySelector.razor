@@ -10,15 +10,30 @@
             </CardBody>
         </Card>
     </div>
-
-    @foreach (var category in _categories)
-    {
-        <div class="col-md-2">
-            <CategorySelectorButton Category="category"
-                                    IsActive="@(category == SelectedCategory)"
-                                    OnClickCallback="() => OnCategorySelectorButtonClicked(category)" />
+    
+    <div class="col-md-10">
+        <div class="row g-3 h-100">
+            @if (_categories is null)
+            {
+                <div class="col h-100 position-relative">
+                    <div class="position-absolute top-50 start-50 translate-middle">
+                        <Spinner/>
+                    </div>
+                </div>
+            }
+            else
+            {
+                @foreach (var category in _categories)
+                {
+                    <div class="col-md-2">
+                        <CategorySelectorButton Category="category"
+                                                IsActive="@(category == SelectedCategory)"
+                                                OnClickCallback="() => OnCategorySelectorButtonClicked(category)"/>
+                    </div>
+                }
+            }
         </div>
-    }
+    </div>
 </div>
 
 <ModelSelector Category="@SelectedCategory" />
@@ -27,7 +42,7 @@
     [Parameter]
     public EventCallback<Category> SelectedCategoryChanged { get; set; }
 
-    private Category[] _categories = { };
+    private Category[]? _categories;
 
     protected Category? SelectedCategory { get; set; }
 

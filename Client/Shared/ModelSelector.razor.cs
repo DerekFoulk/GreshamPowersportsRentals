@@ -8,5 +8,8 @@ namespace BlazorApp.Client.Shared
     {
         [JSImport("scrollToModelSelector", nameof(ModelSelector))]
         internal static partial void ScrollToModelSelector();
+        
+        [JSImport("scrollToModelSelectorSpinner", nameof(ModelSelector))]
+        internal static partial void ScrollToModelSelectorSpinner();
     }
 }

@@ -1,12 +1,20 @@
 
 export function scrollToModelSelector() {
     const modelSelectorId = "model-selector";
-
-    console.log(`Scrolling to '#${modelSelectorId}'`);
-
     const element = document.getElementById(modelSelectorId);
 
-    element.scrollIntoView();
+    if (element == null)
+        return;
 
-    console.log(`'#${modelSelectorId}' was scrolled into view`);
+    element.scrollIntoView();
+}
+
+export function scrollToModelSelectorSpinner() {
+    const modelSelectorSpinnerId = "model-selector-spinner";
+    const element = document.getElementById(modelSelectorSpinnerId);
+
+    if (element == null)
+        return;
+
+    element.scrollIntoView();
 }

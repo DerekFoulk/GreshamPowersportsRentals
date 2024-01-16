@@ -5,17 +5,38 @@
 
 @inject ILogger<ModelSelector> Logger
 
-<div class="row g-3" id="model-selector">
-    @foreach (var model in _models)
-    {
-        <div class="col-12">
-            <ModelDetails Model="@model" />
-        </div>
-    }
-</div>
+@if (_models is null && Category is not null)
+{
+    <Card ElementId="model-selector-spinner"
+          Class="position-relative"
+          Style="height: 468.484px;">
+        <CardBody>
+            <div class="position-absolute top-50 start-50 translate-middle">
+                <Spinner/>
+            </div>
+        </CardBody>
+    </Card>
+}
+else if (_models is not null)
+{
+    <div class="row g-3" id="@ModelSelectorId">
+        @foreach (var model in _models)
+        {
+            <div class="col-12">
+                <ModelDetails Model="@model"/>
+            </div>
+        }
+    </div>
+}
+else
+{
+
+}
 
 @code {
-    private Model[] _models = { };
+    private const string ModelSelectorId = "model-selector";
+    
+    private Model[]? _models;
 
     [Parameter]
     [EditorRequired]
@@ -29,6 +50,10 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        _models = null;
+
+        // ScrollToModelSelectorSpinner();
+
         try
         {
             var models = await Http.GetFromJsonAsync<Model[]>("/api/Models") ?? new Model[] { };
@@ -49,7 +74,7 @@
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (_models.Any())
+        if (_models?.Any() == true)
             ScrollToModelSelector();
     }
 
