@@ -2,9 +2,9 @@
     text-decoration: none;
 }
 
-a:hover img {
-    opacity: 0.66666667;
-}
+    a:hover .card-img-bg {
+        opacity: 0.66666667;
+    }
 
 .card-img-bg {
     background-repeat: no-repeat;
