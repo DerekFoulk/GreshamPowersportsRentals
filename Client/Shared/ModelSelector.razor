@@ -1,5 +1,4 @@
 ﻿@using BlazorApp.Shared
-@using System.Runtime.InteropServices.JavaScript
 
 @inject HttpClient Http
 
@@ -42,17 +41,9 @@ else
     [EditorRequired]
     public Category? Category { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await JSHost.ImportAsync(nameof(ModelSelector),
-            $"../Shared/{nameof(ModelSelector)}.razor.js");
-    }
-
     protected override async Task OnParametersSetAsync()
     {
         _models = null;
-
-        // ScrollToModelSelectorSpinner();
 
         try
         {
@@ -70,12 +61,6 @@ else
         {
             Logger.LogError(e, "Failed to load models");
         }
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (_models?.Any() == true)
-            ScrollToModelSelector();
     }
 
 }
