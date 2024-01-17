@@ -17,7 +17,7 @@
             {
                 <div class="col h-100 position-relative">
                     <div class="position-absolute top-50 start-50 translate-middle">
-                        <Spinner/>
+                        <Spinner />
                     </div>
                 </div>
             }
@@ -39,9 +39,6 @@
 <ModelSelector Category="@SelectedCategory" />
 
 @code {
-    [Parameter]
-    public EventCallback<Category> SelectedCategoryChanged { get; set; }
-
     private Category[]? _categories;
 
     protected Category? SelectedCategory { get; set; }
@@ -64,7 +61,5 @@
             return;
 
         SelectedCategory = category;
-
-        SelectedCategoryChanged.InvokeAsync(category);
     }
 }
