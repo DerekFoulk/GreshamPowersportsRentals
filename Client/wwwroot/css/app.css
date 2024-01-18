@@ -69,37 +69,13 @@ h6,
     text-transform: uppercase;
 }
 
-@-webkit-keyframes splashScreenPlaceholdersFade {
-    0%, 33% {
-        opacity: 0;
-    }
-
-    66%, 100% {
-        opacity: 1;
-    }
-}
-
-@keyframes splashScreenPlaceholdersFade {
-    0%, 33% {
-        opacity: 0;
-    }
-
-    66%, 100% {
-        opacity: 1;
-    }
-}
-
 @-webkit-keyframes splashScreenFade {
     0% {
         opacity: 0;
     }
 
-    33%, 66% {
+    66% {
         opacity: 1;
-    }
-
-    100% {
-        opacity: 0;
     }
 }
 
@@ -108,12 +84,8 @@ h6,
         opacity: 0;
     }
 
-    33%, 66% {
+    66% {
         opacity: 1;
-    }
-
-    100% {
-        opacity: 0;
     }
 }
 
@@ -130,11 +102,6 @@ body,
     background-color: #222222;
     -webkit-animation: splashScreenFade 5s linear forwards;
     animation: splashScreenFade 5s linear forwards;
-}
-
-.splash-screen-placeholders {
-    -webkit-animation: splashScreenPlaceholdersFade 5s linear forwards;
-    animation: splashScreenPlaceholdersFade 5s linear forwards;
 }
 
 /* Fix an issue with Blazor.Bootstrap */

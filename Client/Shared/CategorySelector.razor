@@ -11,18 +11,23 @@
         </Card>
     </div>
     
-    <div class="col-md-10">
-        <div class="row g-3 h-100">
-            @if (_categories is null)
-            {
-                <div class="col h-100 position-relative">
-                    <div class="position-absolute top-50 start-50 translate-middle">
-                        <Spinner />
+    @if (_categories is null)
+    {
+        <div class="col-md-10 d-none d-md-block">
+            <div class="row g-3 h-100 placeholder-glow">
+                @for (var i = 0; i < 6; i++)
+                {
+                    <div class="col-md-2 h-100">
+                        <div class="placeholder w-100 h-100"></div>
                     </div>
-                </div>
-            }
-            else
-            {
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col-md-10">
+            <div class="row g-3 h-100">
                 @foreach (var category in _categories)
                 {
                     <div class="col-md-2">
@@ -31,9 +36,9 @@
                                                 OnClickCallback="() => OnCategorySelectorButtonClicked(category)"/>
                     </div>
                 }
-            }
+            </div>
         </div>
-    </div>
+    }
 </div>
 
 <ModelSelector Category="@SelectedCategory" />
