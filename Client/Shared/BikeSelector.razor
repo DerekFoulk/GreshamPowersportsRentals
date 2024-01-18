@@ -1,11 +1,7 @@
 ﻿
 <div class="row row-cols-1 g-3">
     <div class="col">
-        @if (Sizes is null)
-        {
-            <Spinner/>
-        }
-        else
+        @if (Sizes is not null)
         {
             var id = $"size-input-{IdSuffix}";
 
@@ -25,11 +21,7 @@
         }
     </div>
     <div class="col">
-        @if (Colors is null)
-        {
-            <Spinner/>
-        }
-        else
+        @if (Colors is not null)
         {
             var id = $"color-input-{IdSuffix}";
 

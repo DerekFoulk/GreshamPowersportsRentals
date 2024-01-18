@@ -1,14 +1,6 @@
-﻿@using BlazorApp.Shared
-@using System.Web
-@using BlazorApp.Shared.Extensions
+﻿@inject ILogger<ModelDetails> Logger
 
-@inject ILogger<ModelDetails> Logger
-
-@if (Model is null)
-{
-    <Spinner />
-}
-else
+@if (Model is not null)
 {
     <Card>
         <CardHeader>@Model.Name</CardHeader>
@@ -21,11 +13,7 @@ else
                             <Content>
                                 <div class="row row-cols-1 row-cols-lg-2 g-3 p-3">
                                     <div class="col">
-                                        @if (SelectedBike is null)
-                                        {
-                                            <Spinner/>
-                                        }
-                                        else
+                                        @if (SelectedBike is not null)
                                         {
                                             var alt = $"{SelectedBike.Size} {Model.Name} ({SelectedBike.Color})";
 

@@ -1,9 +1,5 @@
 ﻿
-@if (AvailableSizes is null)
-{
-    <Spinner />
-}
-else
+@if (AvailableSizes is not null)
 {
     <div class="row g-3">
         @foreach (var size in AvailableSizes)

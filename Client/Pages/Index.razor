@@ -6,11 +6,7 @@
 <div class="container-fluid">
     <h1>Rentals</h1>
 
-    @if (Rental is null)
-    {
-        <Spinner />
-    }
-    else
+    @if (Rental is not null)
     {
         <EditForm Model="@Rental"
                   OnValidSubmit="@Submit"

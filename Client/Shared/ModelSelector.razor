@@ -1,22 +1,8 @@
-﻿@using BlazorApp.Shared
-
-@inject HttpClient Http
+﻿@inject HttpClient Http
 
 @inject ILogger<ModelSelector> Logger
 
-@if (_models is null && Category is not null)
-{
-    <Card ElementId="model-selector-spinner"
-          Class="position-relative"
-          Style="height: 468.484px;">
-        <CardBody>
-            <div class="position-absolute top-50 start-50 translate-middle">
-                <Spinner/>
-            </div>
-        </CardBody>
-    </Card>
-}
-else if (_models is not null)
+@if (_models is not null)
 {
     <div class="row g-3" id="@ModelSelectorId">
         @foreach (var model in _models)
@@ -26,10 +12,6 @@ else if (_models is not null)
             </div>
         }
     </div>
-}
-else
-{
-
 }
 
 @code {

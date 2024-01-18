@@ -1,12 +1,4 @@
-﻿@using BlazorApp.Shared.Extensions
-
-<label for="@Id" class="form-label">@Label</label>
-@* <NumberInput TValue="int"
-             Min="0"
-             Max="5"
-             @bind-Value="@Qty"
-             Placeholder="Qty"
-             ElementId="@Id" /> *@
+﻿<label for="@Id" class="form-label">@Label</label>
 <InputSelect TValue="int"
              @bind-Value="Qty"
              class="form-select"
