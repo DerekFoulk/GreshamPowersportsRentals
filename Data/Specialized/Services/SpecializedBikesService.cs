@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 
 namespace Data.Specialized.Services
 {
-    public class SpecializedBikesService
+    public class SpecializedBikesService : ISpecializedBikesService
     {
         private readonly ILogger<SpecializedBikesService> _logger;
         private readonly WebDriverOptions _webDriverOptions;
@@ -88,7 +88,7 @@ namespace Data.Specialized.Services
             try
             {
                 bikeDetails = GetBikeDetails(url, webDriver);
-                
+
                 return true;
             }
             catch (Exception e)
@@ -105,7 +105,7 @@ namespace Data.Specialized.Services
         private Model GetBikeDetails(string url, IWebDriver webDriver)
         {
             _logger.LogDebug($"Getting bike details from '{url}'");
-            
+
             _logger.LogTrace($"Navigating to '{url}'");
 
             webDriver.Navigate().GoToUrl(url);

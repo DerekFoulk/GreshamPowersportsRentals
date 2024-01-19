@@ -9,7 +9,7 @@ using OpenQA.Selenium.Edge;
 
 namespace Data.Husqvarna.Services
 {
-    public class HusqvarnaBicyclesService
+    public class HusqvarnaBicyclesService : IHusqvarnaBicyclesService
     {
         private readonly ILogger<HusqvarnaBicyclesService> _logger;
         private readonly WebDriverOptions _webDriverOptions;
