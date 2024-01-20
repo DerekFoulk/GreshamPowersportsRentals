@@ -15,8 +15,6 @@ public class Bike
 
     public Guid Id { get; set; }
 
-    [Newtonsoft.Json.JsonIgnore]
-    [System.Text.Json.Serialization.JsonIgnore]
     public Model Model { get; set; }
 
     public string Size { get; set; }

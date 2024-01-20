@@ -7,7 +7,9 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Edge;
 using System.Reflection;
 using System.Text;
+using BlazorApp.Shared.Contexts;
 using Data.Options;
+using Data.Specialized.Contexts;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
@@ -16,17 +18,19 @@ namespace Data.Specialized.Services
     public class SpecializedBikesService : ISpecializedBikesService
     {
         private readonly ILogger<SpecializedBikesService> _logger;
+        private readonly SpecializedContext _context;
         private readonly WebDriverOptions _webDriverOptions;
         private readonly IWebDriverFactory _webDriverFactory;
 
-        public SpecializedBikesService(ILogger<SpecializedBikesService> logger, IOptionsSnapshot<WebDriverOptions> optionsSnapshot, IWebDriverFactory webDriverFactory)
+        public SpecializedBikesService(ILogger<SpecializedBikesService> logger, IOptionsSnapshot<WebDriverOptions> optionsSnapshot, SpecializedContext context, IWebDriverFactory webDriverFactory)
         {
             _logger = logger;
+            _context = context;
             _webDriverOptions = optionsSnapshot.Value;
             _webDriverFactory = webDriverFactory;
         }
 
-        public async Task<IEnumerable<Model>> GetModelsAsync()
+        public IEnumerable<Model> GetModels()
         {
             _logger.LogDebug("Getting bikes from Specialized's website");
 
@@ -65,18 +69,9 @@ namespace Data.Specialized.Services
 
             _logger.LogInformation($"Scraped {models.Count} bikes from Specialized's website");
 
-            await SaveBikesAsJsonAsync(models);
+            _context.Models.UpdateRange(models);
 
             return models;
-        }
-
-        private async Task SaveBikesAsJsonAsync(List<Model> bikes)
-        {
-            //await using var fileStream = File.Create("Specialized.json");
-            //await JsonSerializer.SerializeAsync(fileStream, bikes);
-
-            var json = JsonConvert.SerializeObject(bikes);
-            await File.WriteAllTextAsync(@"R:\GreshamPowersportsRentals\Api\Specialized.json", json, Encoding.UTF8);
         }
 
         private bool TryGetBikeDetails(string url, IWebDriver webDriver, out Model? bikeDetails)

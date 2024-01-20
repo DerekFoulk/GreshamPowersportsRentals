@@ -1,9 +1,12 @@
-﻿using Data.Factories;
+﻿using BlazorApp.Shared.Contexts;
+using Data.Factories;
 using Data.Options;
+using Data.Specialized.Contexts;
 using Data.Specialized.Models;
 using Data.Specialized.Services;
 using Divergic.Logging.Xunit;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -37,7 +40,6 @@ namespace Data.FunctionalTests.Specialized.Services
         public async Task GetBikes_ReturnsExpected()
         {
             // Arrange
-            var webDriverFactory = new WebDriverFactory();
             var mockOptionsSnapshot = new Mock<IOptionsSnapshot<WebDriverOptions>>();
             var webDriverOptions = new WebDriverOptions
             {
@@ -46,10 +48,18 @@ namespace Data.FunctionalTests.Specialized.Services
             };
             mockOptionsSnapshot.Setup(x => x.Value)
                 .Returns(webDriverOptions);
-            var specializedBikesService = new SpecializedBikesService(Logger, mockOptionsSnapshot.Object, webDriverFactory);
+
+            var options = new DbContextOptionsBuilder<SpecializedContext>()
+                .UseInMemoryDatabase(databaseName: "Specialized")
+                .Options;
+            await using var context = new SpecializedContext(options);
+
+            var webDriverFactory = new WebDriverFactory();
+
+            var specializedBikesService = new SpecializedBikesService(Logger, mockOptionsSnapshot.Object, context, webDriverFactory);
 
             // Act
-            var models = (await specializedBikesService.GetModelsAsync()).ToList();
+            var models = specializedBikesService.GetModels().ToList();
 
             // Assert
             models.Should()
