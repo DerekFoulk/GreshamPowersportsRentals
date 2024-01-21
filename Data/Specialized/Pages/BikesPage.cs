@@ -2,6 +2,7 @@
 using System.Text;
 using AngleSharp.Common;
 using Data.Husqvarna.Pages.Shared;
+using Data.Specialized.Models;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
@@ -28,15 +29,15 @@ namespace Data.Specialized.Pages
             WebDriver.Navigate().GoToUrl(url);
         }
 
-        public List<string> GetBikeDetailUrlsAcrossPages(int? maxPage = null, int? minPage = null)
+        public BikesPagesResult GetBikeDetailUrlsAcrossPages(int? maxPage = null, int? minPage = null)
         {
             Logger.LogDebug("Getting bike detail page URLs");
-
-            var bikeDetailsPagesToScrape = new List<string>();
 
             var currentPageNumber = GetCurrentPageNumberFromUrl();
 
             var stopwatch = Stopwatch.StartNew();
+
+            var bikesPageResults = new List<BikesPageResult>();
 
             while (IsPageWithinRange(currentPageNumber, maxPage, minPage) && !IsLastPage())
             {
@@ -49,7 +50,9 @@ namespace Data.Specialized.Pages
 
                 var urls = GetBikeDetailUrlsFromPage(currentPageNumber);
 
-                bikeDetailsPagesToScrape.AddRange(urls);
+                var bikesPageResult = new BikesPageResult(WebDriver.Url, currentPageNumber, urls);
+
+                bikesPageResults.Add(bikesPageResult);
 
                 var nextPage = currentPageNumber + 1;
 
@@ -59,7 +62,13 @@ namespace Data.Specialized.Pages
                 currentPageNumber++;
             }
 
-            return bikeDetailsPagesToScrape;
+            var bikesPagesResult = new BikesPagesResult(bikesPageResults)
+            {
+                MinPage = minPage,
+                MaxPage = maxPage
+            };
+
+            return bikesPagesResult;
         }
 
         private bool IsPageWithinRange(int pageNumber, int? maxPage = null, int? minPage = null)

@@ -28,25 +28,25 @@ namespace Data.Specialized.Services
             _webDriverFactory = webDriverFactory;
         }
 
-        public IEnumerable<Model> GetModels(int maxBikes, int minPage = 1)
+        public BikesResult GetBikes(int maxBikes, int minPage = 1)
         {
             var pageCount = CalculatePageSpan(maxBikes);
             var maxPage = (minPage + pageCount) - 1;
 
-            return GetModels(maxBikes, minPage, maxPage);
+            return GetBikes(maxBikes, minPage, maxPage);
         }
 
-        public IEnumerable<Model> GetModelsFromPages(int maxPage)
+        public BikesResult GetBikesFromPages(int maxPage)
         {
-            return GetModels(null, null, maxPage);
+            return GetBikes(null, null, maxPage);
         }
 
-        public IEnumerable<Model> GetModelsFromPages(int maxPage, int minPage)
+        public BikesResult GetBikesFromPages(int maxPage, int minPage)
         {
-            return GetModels(null, minPage, maxPage);
+            return GetBikes(null, minPage, maxPage);
         }
 
-        public SpecializedResult GetModels(int? maxBikes = null, int? minPage = null, int? maxPage = null)
+        public BikesResult GetBikes(int? maxBikes = null, int? minPage = null, int? maxPage = null)
         {
             _logger.LogDebug("Getting bikes from Specialized's website");
 
@@ -54,6 +54,8 @@ namespace Data.Specialized.Services
 
             var webDriver = _webDriverFactory.GetWebDriver<EdgeDriver>(
                 TimeSpan.FromSeconds(_webDriverOptions.ImplicitWaitInSeconds), _webDriverOptions.Headless);
+
+            var exceptions = new List<Exception>();
 
             try
             {
@@ -79,7 +81,7 @@ namespace Data.Specialized.Services
 
                 _logger.LogError(e, "Failed to scrape bikes from Specialized's website");
 
-                throw;
+                exceptions.Add(e);
             }
             finally
             {
@@ -100,10 +102,15 @@ namespace Data.Specialized.Services
             {
                 _logger.LogError(e, "Failed to update and save models to Cosmos DB");
 
-                throw;
+                exceptions.Add(e);
             }
 
-            return models;
+            var bikesResult = new BikesResult(bikesPagesResult, bikeDetailsPageResults)
+            {
+                Exceptions = exceptions
+            };
+
+            return bikesResult;
         }
 
         private static int CalculatePageSpan(int bikesCount)

@@ -36,7 +36,7 @@ namespace Data.FunctionalTests.Specialized.Services
         }
 
         [Fact]
-        public async Task GetBikes_ReturnsExpected()
+        public async Task GetSpecializedBikes_ReturnsExpected()
         {
             // Arrange
             var mockOptionsSnapshot = new Mock<IOptionsSnapshot<WebDriverOptions>>();
@@ -61,7 +61,7 @@ namespace Data.FunctionalTests.Specialized.Services
             var specializedBikesService = new SpecializedBikesService(Logger, mockOptionsSnapshot.Object, context, webDriverFactory);
 
             // Act
-            var models = specializedBikesService.GetModels().ToList();
+            var models = specializedBikesService.GetBikes().ToList();
 
             // Assert
             models.Should()

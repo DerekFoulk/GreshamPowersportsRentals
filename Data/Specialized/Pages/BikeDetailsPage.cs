@@ -5,6 +5,7 @@ using Data.Extensions;
 using Data.Pages;
 using Data.Specialized.Entities;
 using Data.Specialized.Exceptions;
+using Data.Specialized.Models;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
@@ -55,7 +56,7 @@ namespace Data.Specialized.Pages
         [FindsBy(How = How.CssSelector, Using = "div[data-component=\"technical-specifications-accordion\"]")]
         public IWebElement? TechnicalSpecificationsAccordion { get; set; }
 
-        public Model GetBikeDetails()
+        public BikeDetailsPageResult GetBikeDetails()
         {
             Logger.LogDebug("Getting bike details");
 
@@ -90,8 +91,10 @@ namespace Data.Specialized.Pages
                 Videos = videos,
                 Breadcrumbs = breadcrumbs
             };
-            
-            return model;
+
+            var bikeDetailsPageResult = new BikeDetailsPageResult(url, model);
+
+            return bikeDetailsPageResult;
         }
 
         private IEnumerable<Breadcrumb> GetBreadcrumbs()

@@ -1,12 +1,12 @@
-﻿using Data.Specialized.Entities;
+﻿using Data.Specialized.Models;
 
 namespace Data.Specialized.Services
 {
     public interface ISpecializedBikesService
     {
-        IEnumerable<Model> GetModels(int? maxBikes = null, int? minPage = null, int? maxPage = null);
-        IEnumerable<Model> GetModels(int maxBikes, int minPage = 1);
-        IEnumerable<Model> GetModelsFromPages(int maxPage);
-        IEnumerable<Model> GetModelsFromPages(int maxPage, int minPage);
+        BikesResult GetBikes(int? maxBikes = null, int? minPage = null, int? maxPage = null);
+        BikesResult GetBikes(int maxBikes, int minPage = 1);
+        BikesResult GetBikesFromPages(int maxPage);
+        BikesResult GetBikesFromPages(int maxPage, int minPage);
     }
 }
