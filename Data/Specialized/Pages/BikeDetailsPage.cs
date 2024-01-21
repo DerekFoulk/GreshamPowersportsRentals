@@ -35,7 +35,7 @@ namespace Data.Specialized.Pages
         [FindsBy(How = How.CssSelector, Using = "div.sc-7881ce43-5.kNHxFW h5")]
         public IList<IWebElement>? Prices { get; set; }
 
-        [FindsBy(How = How.CssSelector, Using = ".sc-e4145e4c-3.dNviJe div")]
+        [FindsBy(How = How.CssSelector, Using = ".sc-728866e0-3.FBCRN div")]
         public IWebElement? Description { get; set; }
 
         [FindsBy(How = How.CssSelector, Using = "div[data-component=\"color-selection\"] button")]
@@ -78,30 +78,39 @@ namespace Data.Specialized.Pages
 
             var modelConfigurations = GetModelConfigurations();
 
-            TechnicalSpecifications technicalSpecifications = null;
-            List<ManualDownload> manualDownloads = null;
+            TechnicalSpecifications? technicalSpecifications = null;
+            List<ManualDownload>? manualDownloads = null;
 
             var breadcrumbs = GetBreadcrumbs();
 
-            var model = new Model(url, name, description, technicalSpecifications, manualDownloads, modelConfigurations, videos, breadcrumbs);
+            var model = new Model(url, name, description)
+            {
+                TechnicalSpecifications = technicalSpecifications,
+                ManualDownloads = manualDownloads,
+                Configurations = modelConfigurations,
+                Videos = videos,
+                Breadcrumbs = breadcrumbs
+            };
             
             return model;
         }
 
-        private IEnumerable<string> GetBreadcrumbs()
+        private IEnumerable<Breadcrumb> GetBreadcrumbs()
         {
             Logger.LogDebug("Getting breadcrumbs");
 
             if (Breadcrumbs is null)
                 throw new NullReferenceException($"'{nameof(Breadcrumbs)}' cannot be null");
 
-            var breadcrumbs = new List<string>();
+            var breadcrumbs = new List<Breadcrumb>();
 
-            foreach (var breadcrumb in Breadcrumbs)
+            foreach (var webElement in Breadcrumbs)
             {
-                var text = breadcrumb.Text;
+                var text = webElement.Text;
 
-                breadcrumbs.Add(text);
+                var breadcrumb = new Breadcrumb(text);
+
+                breadcrumbs.Add(breadcrumb);
             }
 
             return breadcrumbs;
@@ -138,7 +147,7 @@ namespace Data.Specialized.Pages
             return description;
         }
 
-        private IEnumerable<string> GetVideos()
+        private IEnumerable<Video> GetVideos()
         {
             Logger.LogDebug("Getting video links");
 
@@ -146,7 +155,9 @@ namespace Data.Specialized.Pages
 
             Logger.LogTrace("Getting 'href' attributes from all video links");
 
-            var videos = videoLinks.Select(x => x.GetAttribute("href"));
+            var videoUrls = videoLinks.Select(x => x.GetAttribute("href"));
+
+            var videos = videoUrls.Select(x => new Video(x));
 
             return videos;
         }
@@ -172,7 +183,7 @@ namespace Data.Specialized.Pages
             return modelConfigurations;
         }
 
-        private void IterateSizes(string color, IEnumerable<string> images, List<ModelConfiguration> modelConfigurations)
+        private void IterateSizes(string color, IReadOnlyCollection<Image> images, ICollection<ModelConfiguration> modelConfigurations)
         {
             if (SizeButtons is null)
                 throw new NullReferenceException($"'{nameof(SizeButtons)}' cannot be null");
@@ -201,19 +212,21 @@ namespace Data.Specialized.Pages
 
                 var modelConfiguration = new ModelConfiguration(
                     partNumber,
-                    pricing,
                     color,
-                    images,
                     size
                     // TODO: Fix JSON issues with geometry, then uncomment
                     //geometry
-                );
+                )
+                {
+                    Pricing = pricing,
+                    Images = images
+                };
 
                 modelConfigurations.Add(modelConfiguration);
             }
         }
 
-        private void AddColorsAndSizesTo(List<ModelConfiguration> modelConfigurations)
+        private void AddColorsAndSizesTo(ICollection<ModelConfiguration> modelConfigurations)
         {
             if (ColorButtons is null)
                 throw new NullReferenceException($"'{nameof(ColorButtons)}' cannot be null");
@@ -234,7 +247,7 @@ namespace Data.Specialized.Pages
                 {
                     colorButton.Click();
                 }
-                catch (Exception e)
+                catch (ElementClickInterceptedException e)
                 {
                     DismissReviewSlideUp();
 
@@ -249,7 +262,7 @@ namespace Data.Specialized.Pages
                 Logger.LogTrace($"Color: {color}");
 
                 // TODO: Move this to a color only loop as we don't need images for each color/size combination (I think)
-                var images = GetImages();
+                var images = GetImages().ToList();
 
                 IterateSizes(color, images, modelConfigurations);
             }
@@ -347,7 +360,7 @@ namespace Data.Specialized.Pages
         }
 
         private GeometryTableRow GetGeometryTableRow(IWebElement row, int rowIndex,
-            List<string> columnHeaderValues)
+            IReadOnlyCollection<string> columnHeaderValues)
         {
             ArgumentNullException.ThrowIfNull(row);
 
@@ -406,7 +419,7 @@ namespace Data.Specialized.Pages
             Logger.LogTrace($"Page loaded after '{stopwatch.Elapsed}'");
         }
 
-        private void ThrowIfTableLayoutIsUnexpected(ReadOnlyCollection<IWebElement> columns)
+        private void ThrowIfTableLayoutIsUnexpected(IReadOnlyCollection<IWebElement> columns)
         {
             Logger.LogTrace("Validating table layout");
 
@@ -452,14 +465,14 @@ namespace Data.Specialized.Pages
             Logger.LogTrace("Table structure is valid");
         }
 
-        private IEnumerable<string> GetImages()
+        private IEnumerable<Image> GetImages()
         {
             Logger.LogDebug($"Getting images from '{nameof(Gallery)}'");
 
             if (Gallery is null)
                 throw new NullReferenceException($"'{nameof(Gallery)}' cannot be null");
 
-            var images = new List<string>();
+            var images = new List<Image>();
 
             var imgElements = Gallery.FindElements(By.TagName("img"));
 
@@ -471,7 +484,9 @@ namespace Data.Specialized.Pages
 
                 Logger.LogTrace($"Adding '{src}' to images");
 
-                images.Add(src);
+                var image = new Image(src);
+
+                images.Add(image);
             }
 
             Logger.LogTrace($"Scraped {images.Count} images from '{nameof(Gallery)}'");

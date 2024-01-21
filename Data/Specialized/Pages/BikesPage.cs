@@ -64,12 +64,15 @@ namespace Data.Specialized.Pages
 
         private bool IsPageWithinRange(int pageNumber, int? maxPage = null, int? minPage = null)
         {
-            var isPageWithinRange = maxPage == null && minPage == null;
+            var conditions = new List<bool>();
 
-            if (maxPage != null)
-                isPageWithinRange = pageNumber <= maxPage;
-            if (minPage != null)
-                isPageWithinRange = pageNumber >= minPage;
+            if (maxPage is not null)
+                conditions.Add(pageNumber <= maxPage);
+
+            if (minPage is not null)
+                conditions.Add(pageNumber >= minPage);
+
+            var isPageWithinRange = conditions.All(x => x);
 
             return isPageWithinRange;
         }

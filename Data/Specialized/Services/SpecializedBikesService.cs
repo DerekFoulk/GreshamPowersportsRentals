@@ -6,12 +6,9 @@ using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Edge;
 using System.Reflection;
-using System.Text;
-using BlazorApp.Shared.Contexts;
 using Data.Options;
 using Data.Specialized.Contexts;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 
 namespace Data.Specialized.Services
 {
@@ -30,7 +27,25 @@ namespace Data.Specialized.Services
             _webDriverFactory = webDriverFactory;
         }
 
-        public IEnumerable<Model> GetModels()
+        public IEnumerable<Model> GetModels(int maxBikes, int minPage = 1)
+        {
+            var pageCount = CalculatePageSpan(maxBikes);
+            var maxPage = (minPage + pageCount) - 1;
+
+            return GetModels(maxBikes, minPage, maxPage);
+        }
+
+        public IEnumerable<Model> GetModelsFromPages(int maxPage)
+        {
+            return GetModels(null, null, maxPage);
+        }
+
+        public IEnumerable<Model> GetModelsFromPages(int maxPage, int minPage)
+        {
+            return GetModels(null, minPage, maxPage);
+        }
+
+        public IEnumerable<Model> GetModels(int? maxBikes = null, int? minPage = null, int? maxPage = null)
         {
             _logger.LogDebug("Getting bikes from Specialized's website");
 
@@ -43,7 +58,10 @@ namespace Data.Specialized.Services
             {
                 var bikesPage = new BikesPage(_logger, webDriver);
 
-                var urls = bikesPage.GetBikeDetailUrlsAcrossPages().Distinct().ToList();
+                var urls = bikesPage.GetBikeDetailUrlsAcrossPages(maxPage, minPage).Distinct().ToList();
+
+                if (maxBikes is not null)
+                    urls = urls.Take((int)maxBikes).ToList();
 
                 _logger.LogDebug($"Found {urls.Count} bike details page URLs to scrape");
 
@@ -69,9 +87,28 @@ namespace Data.Specialized.Services
 
             _logger.LogInformation($"Scraped {models.Count} bikes from Specialized's website");
 
-            _context.Models.UpdateRange(models);
+            try
+            {
+                _context.Database.EnsureDeleted();
+                _context.Database.EnsureCreated();
+
+                _context.Models.UpdateRange(models);
+                _context.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to update and save models to Cosmos DB");
+
+                throw;
+            }
 
             return models;
+        }
+
+        private static int CalculatePageSpan(int bikesCount)
+        {
+            const int bikesPerPage = 18;
+            return (bikesCount + bikesPerPage - 1) / bikesPerPage;
         }
 
         private bool TryGetBikeDetails(string url, IWebDriver webDriver, out Model? bikeDetails)

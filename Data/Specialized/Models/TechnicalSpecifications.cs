@@ -1,6 +1,8 @@
-﻿namespace Data.Specialized.Models
+﻿using BlazorApp.Shared;
+
+namespace Data.Specialized.Models
 {
-    public class TechnicalSpecifications
+    public class TechnicalSpecifications : Entity
     {
     }
 }

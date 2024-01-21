@@ -21,7 +21,7 @@ namespace Data.FunctionalTests.Specialized.Services
 
         public SpecializedBikeServiceTests(ITestOutputHelper output) : base(output, LogLevel.Information)
         {
-            AssertionOptions.FormattingOptions.MaxDepth = 1;
+            AssertionOptions.FormattingOptions.MaxDepth = 5;
             AssertionOptions.FormattingOptions.MaxLines = int.MaxValue;
         }
 
@@ -50,7 +50,10 @@ namespace Data.FunctionalTests.Specialized.Services
                 .Returns(webDriverOptions);
 
             var options = new DbContextOptionsBuilder<SpecializedContext>()
-                .UseInMemoryDatabase(databaseName: "Specialized")
+                .UseCosmos("https://cosmos-gprentals-dev-001.documents.azure.com:443/",
+                    "FESOV0K6q0DTaHKp8ihWZQhRianqZGlkzzPpMQsplcVbUZLeGwqf5V0VbXNSxvVwhdNgZ9Wd9K3IACDbagBlAg==",
+                    "Specialized")
+                //.UseInMemoryDatabase(databaseName: "Specialized")
                 .Options;
             await using var context = new SpecializedContext(options);
 
@@ -116,13 +119,13 @@ namespace Data.FunctionalTests.Specialized.Services
                             configuration.Images.Should()
                                 .AllSatisfy(image =>
                                 {
-                                    image.Should()
+                                    image.Url.Should()
                                         .NotBeNullOrWhiteSpace();
-                                    image.Should()
+                                    image.Url.Should()
                                         .Contain("http");
-                                    image.Should()
+                                    image.Url.Should()
                                         .Contain("/");
-                                    image.Should()
+                                    image.Url.Should()
                                         .Contain(".");
                                 });
 
@@ -163,23 +166,28 @@ namespace Data.FunctionalTests.Specialized.Services
                         model.Videos.Should()
                             .AllSatisfy(video =>
                             {
-                                video.Should()
+                                video.Url.Should()
                                     .NotBeNullOrWhiteSpace();
-                                video.Should()
+                                video.Url.Should()
                                     .Contain("http");
-                                video.Should()
+                                video.Url.Should()
                                     .Contain("/");
-                                video.Should()
+                                video.Url.Should()
                                     .Contain(".");
                             });
                     }
 
-                    model.Breadcrumbs.Should()
+                    model.Breadcrumbs?.Select(x => x.Text).Should()
                         .NotBeNullOrEmpty()
                         .And.ContainEquivalentOf("Bikes");
                 });
                 //.BeGreaterOrEqualTo(305)
                 //.And.BeLessThan(315);
+
+                context.Models.Should()
+                    .NotBeNullOrEmpty()
+                    .And.HaveCount(models.Count)
+                    .And.BeEquivalentTo(models);
         }
     }
 }
