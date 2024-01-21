@@ -6,7 +6,7 @@ using System.Linq;
 using AutoBogus;
 using BlazorApp.Shared;
 using BlazorApp.Shared.Extensions;
-using Data.Specialized.Models;
+using Data.Specialized.Entities;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Model = BlazorApp.Shared.Model;
@@ -89,7 +89,7 @@ namespace Api
         {
             using var streamReader = File.OpenText("Specialized.json");
             var serializer = new JsonSerializer();
-            var specializedModels = serializer.Deserialize(streamReader, typeof(List<Data.Specialized.Models.Model>)) as List<Data.Specialized.Models.Model>;
+            var specializedModels = serializer.Deserialize(streamReader, typeof(List<Data.Specialized.Entities.Model>)) as List<Data.Specialized.Entities.Model>;
 
             if (specializedModels is null || !specializedModels.Any())
                 throw new NullReferenceException($"'{nameof(specializedModels)}' cannot be null");
@@ -110,7 +110,7 @@ namespace Api
             return models;
         }
 
-        private Model ConvertToModel(Data.Specialized.Models.Model specializedModel)
+        private Model ConvertToModel(Data.Specialized.Entities.Model specializedModel)
         {
             var id = Guid.NewGuid();
             var manufacturer =
@@ -180,7 +180,7 @@ namespace Api
             return pricePerHour;
         }
 
-        private Category GetCategory(Data.Specialized.Models.Model specializedModel)
+        private Category GetCategory(Data.Specialized.Entities.Model specializedModel)
         {
             foreach (var category in Categories)
             {

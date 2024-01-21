@@ -1,6 +1,6 @@
 ﻿using BlazorApp.Shared;
 
-namespace Data.Specialized.Models
+namespace Data.Specialized.Entities
 {
     public class ManualDownload : Entity
     {

@@ -1,10 +1,8 @@
-﻿using Data.Extensions;
-using Data.Pages;
+﻿using Data.Pages;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
-using System.Reflection;
 
 namespace Data.Specialized.Pages
 {

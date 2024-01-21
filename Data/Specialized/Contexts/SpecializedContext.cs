@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Model = Data.Specialized.Models.Model;
+using Model = Data.Specialized.Entities.Model;
 
 namespace Data.Specialized.Contexts
 {

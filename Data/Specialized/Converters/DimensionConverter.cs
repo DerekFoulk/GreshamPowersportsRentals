@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
-using System.Drawing;
 using System.Globalization;
+using Data.Specialized.Entities;
 
-namespace Data.Specialized.Models
+namespace Data.Specialized.Converters
 {
     public class DimensionConverter : TypeConverter
     {

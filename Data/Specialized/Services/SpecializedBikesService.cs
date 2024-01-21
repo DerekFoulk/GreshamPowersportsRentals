@@ -8,6 +8,7 @@ using OpenQA.Selenium.Edge;
 using System.Reflection;
 using Data.Options;
 using Data.Specialized.Contexts;
+using Data.Specialized.Entities;
 using Microsoft.Extensions.Options;
 
 namespace Data.Specialized.Services
@@ -45,7 +46,7 @@ namespace Data.Specialized.Services
             return GetModels(null, minPage, maxPage);
         }
 
-        public IEnumerable<Model> GetModels(int? maxBikes = null, int? minPage = null, int? maxPage = null)
+        public SpecializedResult GetModels(int? maxBikes = null, int? minPage = null, int? maxPage = null)
         {
             _logger.LogDebug("Getting bikes from Specialized's website");
 

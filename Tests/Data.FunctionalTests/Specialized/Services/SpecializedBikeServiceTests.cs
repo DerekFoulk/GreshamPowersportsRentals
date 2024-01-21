@@ -1,8 +1,7 @@
-﻿using BlazorApp.Shared.Contexts;
-using Data.Factories;
+﻿using Data.Factories;
 using Data.Options;
 using Data.Specialized.Contexts;
-using Data.Specialized.Models;
+using Data.Specialized.Entities;
 using Data.Specialized.Services;
 using Divergic.Logging.Xunit;
 using FluentAssertions;

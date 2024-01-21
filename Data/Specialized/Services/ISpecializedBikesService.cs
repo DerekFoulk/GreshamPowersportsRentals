@@ -1,4 +1,4 @@
-﻿using Data.Specialized.Models;
+﻿using Data.Specialized.Entities;
 
 namespace Data.Specialized.Services
 {
