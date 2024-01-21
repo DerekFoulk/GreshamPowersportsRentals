@@ -2,7 +2,7 @@
 using System.Text;
 using AngleSharp.Common;
 using Data.Husqvarna.Pages.Shared;
-using Data.Specialized.Models;
+using Data.Specialized.Entities;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
@@ -62,8 +62,9 @@ namespace Data.Specialized.Pages
                 currentPageNumber++;
             }
 
-            var bikesPagesResult = new BikesPagesResult(bikesPageResults)
+            var bikesPagesResult = new BikesPagesResult()
             {
+                BikesPageResults = bikesPageResults,
                 MinPage = minPage,
                 MaxPage = maxPage
             };

@@ -36,13 +36,13 @@ namespace Data.FunctionalTests.Specialized.Services
         }
 
         [Fact]
-        public async Task GetSpecializedBikes_ReturnsExpected()
+        public async Task GetBikesAsync_ReturnsExpected()
         {
             // Arrange
             var mockOptionsSnapshot = new Mock<IOptionsSnapshot<WebDriverOptions>>();
             var webDriverOptions = new WebDriverOptions
             {
-                Headless = true,
+                Headless = false,
                 ImplicitWaitInSeconds = 3
             };
             mockOptionsSnapshot.Setup(x => x.Value)
@@ -61,7 +61,35 @@ namespace Data.FunctionalTests.Specialized.Services
             var specializedBikesService = new SpecializedBikesService(Logger, mockOptionsSnapshot.Object, context, webDriverFactory);
 
             // Act
-            var models = specializedBikesService.GetBikes().ToList();
+            var bikesResult = await specializedBikesService.GetBikesAsync();
+
+            // Assert
+            bikesResult.Should()
+                .BeOfType<BikesResult>()
+                .And.NotBeNull();
+
+            bikesResult.BikesPagesResult.Should()
+                .BeOfType<BikesPagesResult>()
+                .And.NotBeNull();
+
+            bikesResult.BikeDetailsPageResults.Should()
+                .BeAssignableTo<IEnumerable<BikeDetailsPageResult>>()
+                .And.NotBeNullOrEmpty();
+
+            bikesResult.MaxBikes.Should()
+                .BeOfType(typeof(int?))
+                .And.Be(1);
+            bikesResult.MinPage.Should()
+                .BeOfType(typeof(int?))
+                .And.BeNull();
+            bikesResult.MaxPage.Should()
+                .BeOfType(typeof(int?))
+                .And.BeNull();
+        }
+
+        private void LazyAssertions(BikesResult bikesResult, SpecializedContext context)
+        {
+            var models = bikesResult.BikeDetailsPageResults.Select(x => x.Model).ToList();
 
             // Assert
             models.Should()
@@ -74,7 +102,7 @@ namespace Data.FunctionalTests.Specialized.Services
                     model.Name.Length.Should()
                         .BeGreaterThan(5)
                         .And.BeLessThan(40, $"[Model #{models.IndexOf(model)}] Long name detected for '{model}' ('{model.Name}') @ '{model.Url}'");
-                    
+
                     model.Description.Should()
                         .NotBeNullOrWhiteSpace();
                     model.Description.Length.Should()
@@ -180,13 +208,13 @@ namespace Data.FunctionalTests.Specialized.Services
                         .NotBeNullOrEmpty()
                         .And.ContainEquivalentOf("Bikes");
                 });
-                //.BeGreaterOrEqualTo(305)
-                //.And.BeLessThan(315);
+            //.BeGreaterOrEqualTo(305)
+            //.And.BeLessThan(315);
 
-                context.Models.Should()
-                    .NotBeNullOrEmpty()
-                    .And.HaveCount(models.Count)
-                    .And.BeEquivalentTo(models);
+            context.Models.Should()
+                .NotBeNullOrEmpty()
+                .And.HaveCount(models.Count)
+                .And.BeEquivalentTo(models);
         }
     }
 }

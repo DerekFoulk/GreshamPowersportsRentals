@@ -1,6 +1,5 @@
 ﻿using Data.Extensions;
 using Data.Factories;
-using Data.Specialized.Models;
 using Data.Specialized.Pages;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
@@ -28,51 +27,61 @@ namespace Data.Specialized.Services
             _webDriverFactory = webDriverFactory;
         }
 
-        public BikesResult GetBikes(int maxBikes, int minPage = 1)
+        public async Task<BikesResult> GetBikesAsync(int maxBikes, int minPage = 1)
         {
             var pageCount = CalculatePageSpan(maxBikes);
             var maxPage = (minPage + pageCount) - 1;
 
-            return GetBikes(maxBikes, minPage, maxPage);
+            return await GetBikesAsync(maxBikes, minPage, maxPage);
         }
 
-        public BikesResult GetBikesFromPages(int maxPage)
+        public async Task<BikesResult> GetBikesFromPagesAsync(int maxPage)
         {
-            return GetBikes(null, null, maxPage);
+            return await GetBikesAsync(null, null, maxPage);
         }
 
-        public BikesResult GetBikesFromPages(int maxPage, int minPage)
+        public async Task<BikesResult> GetBikesFromPagesAsync(int maxPage, int minPage)
         {
-            return GetBikes(null, minPage, maxPage);
+            return await GetBikesAsync(null, minPage, maxPage);
         }
 
-        public BikesResult GetBikes(int? maxBikes = null, int? minPage = null, int? maxPage = null)
+        public async Task<BikesResult> GetBikesAsync(int? maxBikes = null, int? minPage = null, int? maxPage = null)
         {
             _logger.LogDebug("Getting bikes from Specialized's website");
 
-            var models = new List<Model>();
+            var bikeDetailsPageResults = new List<BikeDetailsPageResult>();
 
             var webDriver = _webDriverFactory.GetWebDriver<EdgeDriver>(
                 TimeSpan.FromSeconds(_webDriverOptions.ImplicitWaitInSeconds), _webDriverOptions.Headless);
 
-            var exceptions = new List<Exception>();
+            var bikesPagesResult = new BikesPagesResult();
 
             try
             {
                 var bikesPage = new BikesPage(_logger, webDriver);
 
-                var urls = bikesPage.GetBikeDetailUrlsAcrossPages(maxPage, minPage).Distinct().ToList();
+                bikesPagesResult = bikesPage.GetBikeDetailUrlsAcrossPages(maxPage, minPage);
+
+                var urls = bikesPagesResult.BikesPageResults?.SelectMany(x => x.Urls).ToList();
 
                 if (maxBikes is not null)
-                    urls = urls.Take((int)maxBikes).ToList();
+                    urls = urls?.Take((int)maxBikes).ToList();
 
-                _logger.LogDebug($"Found {urls.Count} bike details page URLs to scrape");
+                _logger.LogDebug($"Found {urls?.Count} bike details page URLs to scrape");
 
-                foreach (var url in urls)
+                if (urls?.Any() == true)
                 {
-                    var bikeDetails = GetBikeDetails(url, webDriver);
+                    await _context.Database.EnsureDeletedAsync();
+                    await _context.Database.EnsureCreatedAsync();
 
-                    models.Add(bikeDetails);
+                    foreach (var url in urls)
+                    {
+                        var bikeDetailsPageResult = GetBikeDetails(url, webDriver);
+
+                        await SaveBikeDetailsAsync(bikeDetailsPageResult);
+
+                        bikeDetailsPageResults.Add(bikeDetailsPageResult);
+                    }
                 }
             }
             catch (Exception e)
@@ -81,36 +90,31 @@ namespace Data.Specialized.Services
 
                 _logger.LogError(e, "Failed to scrape bikes from Specialized's website");
 
-                exceptions.Add(e);
+                throw;
             }
             finally
             {
                 webDriver.Quit();
             }
 
-            _logger.LogInformation($"Scraped {models.Count} bikes from Specialized's website");
-
-            try
-            {
-                _context.Database.EnsureDeleted();
-                _context.Database.EnsureCreated();
-
-                _context.Models.UpdateRange(models);
-                _context.SaveChanges();
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Failed to update and save models to Cosmos DB");
-
-                exceptions.Add(e);
-            }
+            _logger.LogInformation($"Scraped {bikeDetailsPageResults.Count} bikes from Specialized's website");
 
             var bikesResult = new BikesResult(bikesPagesResult, bikeDetailsPageResults)
             {
-                Exceptions = exceptions
+                MaxBikes = maxBikes,
+                MinPage = minPage,
+                MaxPage = maxPage
             };
 
             return bikesResult;
+        }
+
+        private async Task SaveBikeDetailsAsync(BikeDetailsPageResult bikeDetailsPageResult)
+        {
+            var model = bikeDetailsPageResult.Model;
+            await _context.Models.AddAsync(model);
+
+            await _context.SaveChangesAsync();
         }
 
         private static int CalculatePageSpan(int bikesCount)
@@ -119,30 +123,7 @@ namespace Data.Specialized.Services
             return (bikesCount + bikesPerPage - 1) / bikesPerPage;
         }
 
-        private bool TryGetBikeDetails(string url, IWebDriver webDriver, out Model? bikeDetails)
-        {
-            bikeDetails = null;
-
-            _logger.LogDebug($"Trying to get bike details from '{url}'");
-
-            try
-            {
-                bikeDetails = GetBikeDetails(url, webDriver);
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                //webDriver.CaptureHtmlAndScreenshot($"{DateTime.Now:yyyyMMddHHmmss}_{e.GetType().FullName}_{GetType().FullName}_{MethodBase.GetCurrentMethod()?.Name}");
-                webDriver.CaptureHtmlAndScreenshot(e, GetType(), MethodBase.GetCurrentMethod());
-
-                _logger.LogError(e, $"Failed to scrape bike details from '{url}'");
-
-                return false;
-            }
-        }
-
-        private Model GetBikeDetails(string url, IWebDriver webDriver)
+        private BikeDetailsPageResult GetBikeDetails(string url, IWebDriver webDriver)
         {
             _logger.LogDebug($"Getting bike details from '{url}'");
 
@@ -151,9 +132,9 @@ namespace Data.Specialized.Services
             webDriver.Navigate().GoToUrl(url);
 
             var bikeDetailsPage = new BikeDetailsPage(_logger, webDriver);
-            var bikeDetails = bikeDetailsPage.GetBikeDetails();
+            var bikeDetailsPageResult = bikeDetailsPage.GetBikeDetails();
 
-            return bikeDetails;
+            return bikeDetailsPageResult;
         }
     }
 }

@@ -5,7 +5,6 @@ using Data.Extensions;
 using Data.Pages;
 using Data.Specialized.Entities;
 using Data.Specialized.Exceptions;
-using Data.Specialized.Models;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
