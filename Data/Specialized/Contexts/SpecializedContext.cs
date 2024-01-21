@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Model = Data.Specialized.Entities.Model;
+﻿using Data.Specialized.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data.Specialized.Contexts
 {
@@ -10,5 +10,6 @@ namespace Data.Specialized.Contexts
         }
 
         public DbSet<Model> Models { get; set; }
+        public DbSet<ModelConfiguration> ModelConfigurations { get; set; }
     }
 }

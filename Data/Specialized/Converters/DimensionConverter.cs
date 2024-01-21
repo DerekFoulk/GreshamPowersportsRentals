@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
 using Data.Specialized.Entities;
+using Data.Specialized.Models;
 
 namespace Data.Specialized.Converters
 {

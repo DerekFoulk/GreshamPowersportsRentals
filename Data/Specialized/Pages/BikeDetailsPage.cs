@@ -5,6 +5,7 @@ using Data.Extensions;
 using Data.Pages;
 using Data.Specialized.Entities;
 using Data.Specialized.Exceptions;
+using Data.Specialized.Models;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
@@ -213,13 +214,13 @@ namespace Data.Specialized.Pages
 
                 var modelConfiguration = new ModelConfiguration(
                     partNumber,
+                    pricing,
                     color,
                     size
                     // TODO: Fix JSON issues with geometry, then uncomment
                     //geometry
                 )
                 {
-                    Pricing = pricing,
                     Images = images
                 };
 

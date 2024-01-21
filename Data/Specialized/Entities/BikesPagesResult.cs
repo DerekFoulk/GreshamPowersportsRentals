@@ -7,6 +7,8 @@ namespace Data.Specialized.Entities
     /// </summary>
     public class BikesPagesResult : Entity
     {
+        public BikesPagesResult() { }
+
         public int? MinPage { get; set; }
 
         public int? MaxPage { get; set; }

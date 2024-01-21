@@ -49,10 +49,10 @@ namespace Data.FunctionalTests.Specialized.Services
                 .Returns(webDriverOptions);
 
             var options = new DbContextOptionsBuilder<SpecializedContext>()
-                .UseCosmos("https://cosmos-gprentals-dev-001.documents.azure.com:443/",
-                    "FESOV0K6q0DTaHKp8ihWZQhRianqZGlkzzPpMQsplcVbUZLeGwqf5V0VbXNSxvVwhdNgZ9Wd9K3IACDbagBlAg==",
-                    "Specialized")
-                //.UseInMemoryDatabase(databaseName: "Specialized")
+                //.UseCosmos("https://cosmos-gprentals-dev-001.documents.azure.com:443/",
+                //    "FESOV0K6q0DTaHKp8ihWZQhRianqZGlkzzPpMQsplcVbUZLeGwqf5V0VbXNSxvVwhdNgZ9Wd9K3IACDbagBlAg==",
+                //    "Specialized")
+                .UseInMemoryDatabase(databaseName: "Specialized")
                 .Options;
             await using var context = new SpecializedContext(options);
 
@@ -61,7 +61,7 @@ namespace Data.FunctionalTests.Specialized.Services
             var specializedBikesService = new SpecializedBikesService(Logger, mockOptionsSnapshot.Object, context, webDriverFactory);
 
             // Act
-            var bikesResult = await specializedBikesService.GetBikesAsync();
+            var bikesResult = await specializedBikesService.GetBikesAsync(10);
 
             // Assert
             bikesResult.Should()
@@ -77,14 +77,14 @@ namespace Data.FunctionalTests.Specialized.Services
                 .And.NotBeNullOrEmpty();
 
             bikesResult.MaxBikes.Should()
-                .BeOfType(typeof(int?))
-                .And.Be(1);
+                .BeOfType(typeof(int))
+                .And.Be(10);
             bikesResult.MinPage.Should()
-                .BeOfType(typeof(int?))
-                .And.BeNull();
+                .BeOfType(typeof(int))
+                .And.Be(1);
             bikesResult.MaxPage.Should()
                 .BeOfType(typeof(int?))
-                .And.BeNull();
+                .And.Be(1);
         }
 
         private void LazyAssertions(BikesResult bikesResult, SpecializedContext context)

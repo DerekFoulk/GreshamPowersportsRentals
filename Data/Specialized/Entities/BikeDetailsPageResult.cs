@@ -8,6 +8,8 @@ namespace Data.Specialized.Entities
     /// </summary>
     public class BikeDetailsPageResult : Entity
     {
+        public BikeDetailsPageResult() { }
+
         public BikeDetailsPageResult(string url, Model model)
         {
             Url = url;

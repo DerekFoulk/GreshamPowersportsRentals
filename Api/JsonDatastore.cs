@@ -143,7 +143,7 @@ namespace Api
 
         private Bike ConvertToBike(ModelConfiguration configuration, Model model)
         {
-            var bike = new Bike(model, configuration.Size, configuration.Color, configuration.Images)
+            var bike = new Bike(model, configuration.Size, configuration.Color, configuration.Images.Select(x => x.Url))
             {
                 Id = Guid.NewGuid(),
                 IsAvailable = true
@@ -184,7 +184,7 @@ namespace Api
         {
             foreach (var category in Categories)
             {
-                if (specializedModel.Breadcrumbs.Contains(category.Name, StringComparer.OrdinalIgnoreCase))
+                if (specializedModel.Breadcrumbs?.Any(x => x.Text.Contains(category.Name, StringComparison.OrdinalIgnoreCase)) == true)
                 {
                     return category;
                 }

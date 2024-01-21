@@ -7,6 +7,8 @@ namespace Data.Specialized.Entities
     /// </summary>
     public class BikesResult : Entity
     {
+        public BikesResult() { }
+
         public BikesResult(BikesPagesResult bikesPagesResult, IEnumerable<BikeDetailsPageResult> bikeDetailsPageResults)
         {
             BikesPagesResult = bikesPagesResult;
