@@ -1,6 +1,6 @@
 ﻿@if (Category is not null)
 {
-    <a class="link-body-emphasis link-offset-2 link-underline-opacity-25 link-underline-opacity-75-hover h-100" @onclick="OnClickCallback">
+    <a href="javascript:;" class="link-body-emphasis link-offset-2 link-underline-opacity-25 link-underline-opacity-75-hover h-100" @onclick="OnClickCallback">
         <div class="card @CardClass h-100 text-center">
             @* <img src="@Category.Image" class="card-img-top" alt="@Category.Name"> *@
             <div class="card-img-bg h-100" style="background-image: url(@Category.Image);"></div>
