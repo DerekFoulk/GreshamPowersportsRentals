@@ -1,4 +1,3 @@
-﻿using System;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker;
@@ -7,34 +6,25 @@ using Microsoft.Extensions.Logging;
 
 namespace Api
 {
-    public class BikeFunction
+    public class RentalsFunction
     {
         private readonly IDatastore _datastore;
         private readonly ILogger _logger;
 
-        public BikeFunction(ILoggerFactory loggerFactory, IDatastore datastore)
+        public RentalsFunction(ILoggerFactory loggerFactory, IDatastore datastore)
         {
             _datastore = datastore;
-            _logger = loggerFactory.CreateLogger<BikeFunction>();
+            _logger = loggerFactory.CreateLogger<RentalsFunction>();
         }
 
-        [Function("Bikes")]
+        [Function("Rentals")]
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
         {
-            var result = _datastore.Bikes;
+            var result = _datastore.Rentals;
 
             var response = req.CreateResponse(HttpStatusCode.OK);
 
-            try
-            {
-                await response.WriteAsJsonAsync(result);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Failed to write response as JSON");
-
-                throw;
-            }
+            await response.WriteAsJsonAsync(result);
 
             return response;
         }

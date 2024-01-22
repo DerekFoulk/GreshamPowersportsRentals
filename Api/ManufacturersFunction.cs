@@ -6,22 +6,22 @@ using Microsoft.Extensions.Logging;
 
 namespace Api
 {
-    public class CategoryFunction
+    public class ManufacturersFunction
     {
         private readonly IDatastore _datastore;
         private readonly ILogger _logger;
 
-        public CategoryFunction(ILoggerFactory loggerFactory, IDatastore datastore)
+        public ManufacturersFunction(ILoggerFactory loggerFactory, IDatastore datastore)
         {
             _datastore = datastore;
-            _logger = loggerFactory.CreateLogger<CategoryFunction>();
+            _logger = loggerFactory.CreateLogger<ManufacturersFunction>();
         }
 
-        [Function("Categories")]
+        [Function("Manufacturers")]
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
         {
-            var result = _datastore.Categories;
-            
+            var result = _datastore.Manufacturers;
+
             var response = req.CreateResponse(HttpStatusCode.OK);
 
             await response.WriteAsJsonAsync(result);

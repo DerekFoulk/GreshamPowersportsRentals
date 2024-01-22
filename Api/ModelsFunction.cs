@@ -7,15 +7,15 @@ using Microsoft.Extensions.Logging;
 
 namespace Api
 {
-    public class ModelFunction
+    public class ModelsFunction
     {
         private readonly IDatastore _datastore;
         private readonly ILogger _logger;
 
-        public ModelFunction(ILoggerFactory loggerFactory, IDatastore datastore)
+        public ModelsFunction(ILoggerFactory loggerFactory, IDatastore datastore)
         {
             _datastore = datastore;
-            _logger = loggerFactory.CreateLogger<ModelFunction>();
+            _logger = loggerFactory.CreateLogger<ModelsFunction>();
         }
 
         [Function("Models")]
