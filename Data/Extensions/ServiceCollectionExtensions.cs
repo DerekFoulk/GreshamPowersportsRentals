@@ -16,16 +16,22 @@ namespace Data.Extensions
             services.AddScoped<ISpecializedBikesService, SpecializedBikesService>();
             services.AddScoped<IHusqvarnaBicyclesService, HusqvarnaBicyclesService>();
 
-            services.AddDbContext<HusqvarnaContext>(options =>
-                options.UseCosmos("https://cosmos-gprentals-dev-001.documents.azure.com:443/",
-                    "FESOV0K6q0DTaHKp8ihWZQhRianqZGlkzzPpMQsplcVbUZLeGwqf5V0VbXNSxvVwhdNgZ9Wd9K3IACDbagBlAg==",
+            services.AddDbContextFactory<HusqvarnaContext>(options =>
+                options.UseCosmos("https://localhost:8081",
+                    "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
                     "Husqvarna")
+                //options.UseCosmos("https://cosmos-gprentals-dev-001.documents.azure.com:443/",
+                //    "FESOV0K6q0DTaHKp8ihWZQhRianqZGlkzzPpMQsplcVbUZLeGwqf5V0VbXNSxvVwhdNgZ9Wd9K3IACDbagBlAg==",
+                //    "Husqvarna")
             );
 
-            services.AddDbContext<SpecializedContext>(options =>
-                options.UseCosmos("https://cosmos-gprentals-dev-001.documents.azure.com:443/",
-                    "FESOV0K6q0DTaHKp8ihWZQhRianqZGlkzzPpMQsplcVbUZLeGwqf5V0VbXNSxvVwhdNgZ9Wd9K3IACDbagBlAg==",
+            services.AddDbContextFactory<SpecializedContext>(options =>
+                options.UseCosmos("https://localhost:8081",
+                    "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
                     "Specialized")
+                //options.UseCosmos("https://cosmos-gprentals-dev-001.documents.azure.com:443/",
+                //    "FESOV0K6q0DTaHKp8ihWZQhRianqZGlkzzPpMQsplcVbUZLeGwqf5V0VbXNSxvVwhdNgZ9Wd9K3IACDbagBlAg==",
+                //    "Specialized")
             );
 
             return services;

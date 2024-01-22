@@ -8,6 +8,7 @@ using System.Reflection;
 using Data.Options;
 using Data.Specialized.Contexts;
 using Data.Specialized.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace Data.Specialized.Services
@@ -15,14 +16,14 @@ namespace Data.Specialized.Services
     public class SpecializedBikesService : ISpecializedBikesService
     {
         private readonly ILogger<SpecializedBikesService> _logger;
-        private readonly SpecializedContext _context;
+        private readonly IDbContextFactory<SpecializedContext> _contextFactory;
         private readonly WebDriverOptions _webDriverOptions;
         private readonly IWebDriverFactory _webDriverFactory;
 
-        public SpecializedBikesService(ILogger<SpecializedBikesService> logger, IOptionsSnapshot<WebDriverOptions> optionsSnapshot, SpecializedContext context, IWebDriverFactory webDriverFactory)
+        public SpecializedBikesService(ILogger<SpecializedBikesService> logger, IOptionsSnapshot<WebDriverOptions> optionsSnapshot, IDbContextFactory<SpecializedContext> contextFactory, IWebDriverFactory webDriverFactory)
         {
             _logger = logger;
-            _context = context;
+            _contextFactory = contextFactory;
             _webDriverOptions = optionsSnapshot.Value;
             _webDriverFactory = webDriverFactory;
         }
@@ -71,14 +72,16 @@ namespace Data.Specialized.Services
 
                 if (urls?.Any() == true)
                 {
-                    await _context.Database.EnsureDeletedAsync();
-                    await _context.Database.EnsureCreatedAsync();
+                    await using var context = await _contextFactory.CreateDbContextAsync();
+                    
+                    await context.Database.EnsureDeletedAsync();
+                    await context.Database.EnsureCreatedAsync();
 
                     foreach (var url in urls)
                     {
                         var bikeDetailsPageResult = GetBikeDetails(url, webDriver);
 
-                        await SaveBikeDetailsAsync(bikeDetailsPageResult);
+                        await SaveBikeDetailsAsync(bikeDetailsPageResult, context);
 
                         bikeDetailsPageResults.Add(bikeDetailsPageResult);
                     }
@@ -109,12 +112,12 @@ namespace Data.Specialized.Services
             return bikesResult;
         }
 
-        private async Task SaveBikeDetailsAsync(BikeDetailsPageResult bikeDetailsPageResult)
+        private async Task SaveBikeDetailsAsync(BikeDetailsPageResult bikeDetailsPageResult, SpecializedContext context)
         {
             var model = bikeDetailsPageResult.Model;
-            await _context.Models.AddAsync(model);
+            await context.Models.AddAsync(model);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
 
         private static int CalculatePageSpan(int bikesCount)

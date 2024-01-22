@@ -5,6 +5,7 @@ using Data.Specialized.Entities;
 using Data.Specialized.Services;
 using Divergic.Logging.Xunit;
 using FluentAssertions;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -17,22 +18,29 @@ namespace Data.FunctionalTests.Specialized.Services
     {
         private readonly int _maxDepth = AssertionOptions.FormattingOptions.MaxDepth;
         private readonly int _maxLines = AssertionOptions.FormattingOptions.MaxLines;
+        private SqliteConnection _connection;
+        private DbContextOptions<SpecializedContext> _contextOptions;
 
         public SpecializedBikeServiceTests(ITestOutputHelper output) : base(output, LogLevel.Information)
         {
             AssertionOptions.FormattingOptions.MaxDepth = 5;
             AssertionOptions.FormattingOptions.MaxLines = int.MaxValue;
+
+            InitContext();
         }
 
-        protected override void Dispose(bool disposing)
+        private void InitContext()
         {
-            if (!disposing)
-                return;
+            _connection = new SqliteConnection("Filename=:memory:");
+            _connection.Open();
 
-            AssertionOptions.FormattingOptions.MaxDepth = _maxDepth;
-            AssertionOptions.FormattingOptions.MaxLines = _maxLines;
+            _contextOptions = new DbContextOptionsBuilder<SpecializedContext>()
+                .UseSqlite(_connection)
+                .Options;
 
-            base.Dispose(disposing);
+            using var context = new SpecializedContext(_contextOptions);
+
+            context.Database.EnsureCreated();
         }
 
         [Fact]
@@ -48,17 +56,15 @@ namespace Data.FunctionalTests.Specialized.Services
             mockOptionsSnapshot.Setup(x => x.Value)
                 .Returns(webDriverOptions);
 
-            var options = new DbContextOptionsBuilder<SpecializedContext>()
-                //.UseCosmos("https://cosmos-gprentals-dev-001.documents.azure.com:443/",
-                //    "FESOV0K6q0DTaHKp8ihWZQhRianqZGlkzzPpMQsplcVbUZLeGwqf5V0VbXNSxvVwhdNgZ9Wd9K3IACDbagBlAg==",
-                //    "Specialized")
-                .UseInMemoryDatabase(databaseName: "Specialized")
-                .Options;
-            await using var context = new SpecializedContext(options);
+            var context = CreateContext();
+
+            var dbContextFactoryMock = new Mock<IDbContextFactory<SpecializedContext>>();
+            dbContextFactoryMock.Setup(x => x.CreateDbContextAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(context);
 
             var webDriverFactory = new WebDriverFactory();
 
-            var specializedBikesService = new SpecializedBikesService(Logger, mockOptionsSnapshot.Object, context, webDriverFactory);
+            var specializedBikesService = new SpecializedBikesService(Logger, mockOptionsSnapshot.Object, dbContextFactoryMock.Object, webDriverFactory);
 
             // Act
             var bikesResult = await specializedBikesService.GetBikesAsync(10);
@@ -85,6 +91,19 @@ namespace Data.FunctionalTests.Specialized.Services
             bikesResult.MaxPage.Should()
                 .BeOfType(typeof(int))
                 .And.Be(1);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposing)
+                return;
+
+            AssertionOptions.FormattingOptions.MaxDepth = _maxDepth;
+            AssertionOptions.FormattingOptions.MaxLines = _maxLines;
+
+            _connection.Dispose();
+
+            base.Dispose(disposing);
         }
 
         private void LazyAssertions(BikesResult bikesResult, SpecializedContext context)
@@ -216,5 +235,7 @@ namespace Data.FunctionalTests.Specialized.Services
                 .And.HaveCount(models.Count)
                 .And.BeEquivalentTo(models);
         }
+
+        private SpecializedContext CreateContext() => new(_contextOptions);
     }
 }
