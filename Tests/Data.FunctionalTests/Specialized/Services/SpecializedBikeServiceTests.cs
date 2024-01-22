@@ -18,29 +18,11 @@ namespace Data.FunctionalTests.Specialized.Services
     {
         private readonly int _maxDepth = AssertionOptions.FormattingOptions.MaxDepth;
         private readonly int _maxLines = AssertionOptions.FormattingOptions.MaxLines;
-        private SqliteConnection _connection;
-        private DbContextOptions<SpecializedContext> _contextOptions;
 
         public SpecializedBikeServiceTests(ITestOutputHelper output) : base(output, LogLevel.Information)
         {
             AssertionOptions.FormattingOptions.MaxDepth = 5;
             AssertionOptions.FormattingOptions.MaxLines = int.MaxValue;
-
-            InitContext();
-        }
-
-        private void InitContext()
-        {
-            _connection = new SqliteConnection("Filename=:memory:");
-            _connection.Open();
-
-            _contextOptions = new DbContextOptionsBuilder<SpecializedContext>()
-                .UseSqlite(_connection)
-                .Options;
-
-            using var context = new SpecializedContext(_contextOptions);
-
-            context.Database.EnsureCreated();
         }
 
         [Fact]
@@ -56,7 +38,12 @@ namespace Data.FunctionalTests.Specialized.Services
             mockOptionsSnapshot.Setup(x => x.Value)
                 .Returns(webDriverOptions);
 
-            var context = CreateContext();
+            var options = new DbContextOptionsBuilder<SpecializedContext>()
+                .UseCosmos("https://localhost:8081",
+                    "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
+                    "Specialized")
+                .Options;
+            await using var context = new SpecializedContext(options);
 
             var dbContextFactoryMock = new Mock<IDbContextFactory<SpecializedContext>>();
             dbContextFactoryMock.Setup(x => x.CreateDbContextAsync(It.IsAny<CancellationToken>()))
@@ -100,8 +87,6 @@ namespace Data.FunctionalTests.Specialized.Services
 
             AssertionOptions.FormattingOptions.MaxDepth = _maxDepth;
             AssertionOptions.FormattingOptions.MaxLines = _maxLines;
-
-            _connection.Dispose();
 
             base.Dispose(disposing);
         }
@@ -235,7 +220,5 @@ namespace Data.FunctionalTests.Specialized.Services
                 .And.HaveCount(models.Count)
                 .And.BeEquivalentTo(models);
         }
-
-        private SpecializedContext CreateContext() => new(_contextOptions);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace BlazorApp.Shared
 {
@@ -6,6 +7,7 @@ namespace BlazorApp.Shared
     {
         public Entity() { }
 
+        [Key]
         public Guid Id { get; set; }
     }
 }
