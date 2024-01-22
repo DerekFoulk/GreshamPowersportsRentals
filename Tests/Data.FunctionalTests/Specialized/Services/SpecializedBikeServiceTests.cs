@@ -83,7 +83,7 @@ namespace Data.FunctionalTests.Specialized.Services
                 .BeOfType(typeof(int))
                 .And.Be(1);
             bikesResult.MaxPage.Should()
-                .BeOfType(typeof(int?))
+                .BeOfType(typeof(int))
                 .And.Be(1);
         }
 

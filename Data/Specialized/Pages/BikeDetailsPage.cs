@@ -76,21 +76,22 @@ namespace Data.Specialized.Pages
 
             Logger.LogTrace($"Videos: {videos.Count}");
 
-            var modelConfigurations = GetModelConfigurations();
+            var model = new Model(url, name, description)
+            {
+                Videos = videos
+            };
+
+            var modelConfigurations = GetModelConfigurations(model);
 
             TechnicalSpecifications? technicalSpecifications = null;
             List<ManualDownload>? manualDownloads = null;
 
             var breadcrumbs = GetBreadcrumbs();
 
-            var model = new Model(url, name, description)
-            {
-                TechnicalSpecifications = technicalSpecifications,
-                ManualDownloads = manualDownloads,
-                Configurations = modelConfigurations,
-                Videos = videos,
-                Breadcrumbs = breadcrumbs
-            };
+            model.Configurations = modelConfigurations;
+            model.TechnicalSpecifications = technicalSpecifications;
+            model.ManualDownloads = manualDownloads;
+            model.Breadcrumbs = breadcrumbs;
 
             var bikeDetailsPageResult = new BikeDetailsPageResult(url, model);
 
@@ -164,7 +165,7 @@ namespace Data.Specialized.Pages
             return videos;
         }
 
-        private IEnumerable<ModelConfiguration> GetModelConfigurations()
+        private IEnumerable<ModelConfiguration> GetModelConfigurations(Model model)
         {
             Logger.LogDebug("Getting model configurations");
 
@@ -180,12 +181,13 @@ namespace Data.Specialized.Pages
 
             //var geometryTable = GetGeometryTable();
 
-            AddColorsAndSizesTo(modelConfigurations);
+            AddColorsAndSizesTo(modelConfigurations, model);
             
             return modelConfigurations;
         }
 
-        private void IterateSizes(string color, IReadOnlyCollection<Image> images, ICollection<ModelConfiguration> modelConfigurations)
+        private void IterateSizes(string color, IReadOnlyCollection<Image> images,
+            ICollection<ModelConfiguration> modelConfigurations, Model model)
         {
             if (SizeButtons is null)
                 throw new NullReferenceException($"'{nameof(SizeButtons)}' cannot be null");
@@ -216,19 +218,18 @@ namespace Data.Specialized.Pages
                     partNumber,
                     pricing,
                     color,
-                    size
+                    images,
+                    size,
                     // TODO: Fix JSON issues with geometry, then uncomment
                     //geometry
-                )
-                {
-                    Images = images
-                };
+                    model
+                );
 
                 modelConfigurations.Add(modelConfiguration);
             }
         }
 
-        private void AddColorsAndSizesTo(ICollection<ModelConfiguration> modelConfigurations)
+        private void AddColorsAndSizesTo(ICollection<ModelConfiguration> modelConfigurations, Model model)
         {
             if (ColorButtons is null)
                 throw new NullReferenceException($"'{nameof(ColorButtons)}' cannot be null");
@@ -266,7 +267,7 @@ namespace Data.Specialized.Pages
                 // TODO: Move this to a color only loop as we don't need images for each color/size combination (I think)
                 var images = GetImages().ToList();
 
-                IterateSizes(color, images, modelConfigurations);
+                IterateSizes(color, images, modelConfigurations, model);
             }
         }
 

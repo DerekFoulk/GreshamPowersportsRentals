@@ -10,6 +10,5 @@ namespace Data.Specialized.Contexts
         }
 
         public DbSet<Model> Models { get; set; }
-        public DbSet<ModelConfiguration> ModelConfigurations { get; set; }
     }
 }
