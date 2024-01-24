@@ -39,12 +39,14 @@
     }
 </div>
 
-<ModelSelector Category="@SelectedCategory" />
-
 @code {
+    // [Parameter]
+    // public EventCallback<Category> CategorySelected { get; set; }
+
     private Category[]? _categories;
 
-    protected Category? SelectedCategory { get; set; }
+    [Parameter]
+    public Category? SelectedCategory { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -64,5 +66,7 @@
             return;
 
         SelectedCategory = category;
+
+        // CategorySelected.InvokeAsync(SelectedCategory);
     }
 }

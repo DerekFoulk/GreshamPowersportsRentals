@@ -1,0 +1,23 @@
+﻿<h2>Cart</h2>
+
+@if (Rental is not null)
+{
+    if (!Rental.Bikes.Any())
+    {
+        <Alert Color="AlertColor.Secondary">
+            <Icon Name="IconName.Cart"/>
+            Your cart is empty!
+        </Alert>
+    }
+    else
+    {
+        foreach (var bike in Rental.Bikes)
+        {
+            <CartItem Bike="bike"/>
+        }
+    }
+}
+
+@code {
+    public Rental? Rental { get; set; }
+}

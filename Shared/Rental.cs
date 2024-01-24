@@ -22,6 +22,6 @@ namespace BlazorApp.Shared
         public TimeOnly EndTime { get; set; }
 
         [Required]
-        public IEnumerable<Bike> Bikes { get; set; } = new List<Bike>();
+        public List<Bike> Bikes { get; set; } = new();
     }
 }

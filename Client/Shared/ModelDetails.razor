@@ -73,7 +73,8 @@
                         <div class="col">
                             <div class="d-grid gap-3">
                                 <Button Type="ButtonType.Button"
-                                        Color="ButtonColor.Primary">
+                                        Color="ButtonColor.Primary"
+                                        @onclick="OnAddToCartButtonClicked">
                                     <Icon Name="IconName.CartPlus"/>
                                     Add to Cart
                                 </Button>
@@ -113,7 +114,7 @@
         catch (Exception e)
         {
             Logger?.LogError(e, "Cannot calculate price");
-            
+
             throw;
         }
     }
@@ -155,6 +156,19 @@
     private void OnSelectedBikeChanged(Bike bike)
     {
         SelectedBike = bike;
+    }
+
+    private void OnAddToCartButtonClicked()
+    {
+        if (Rental is null)
+            throw new NullReferenceException($"'{nameof(Rental)}' cannot be null");
+
+        if (SelectedBike is null)
+            throw new NullReferenceException($"'{nameof(SelectedBike)}' cannot be null");
+
+        Logger.LogTrace($"Adding '{SelectedBike}' to the rental");
+
+        Rental.Bikes.Add(SelectedBike);
     }
 
 }
