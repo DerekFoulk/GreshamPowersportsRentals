@@ -1,43 +1,48 @@
-﻿<h3>CartItem</h3>
+﻿
+@if (Bike?.Model is not null)
+{
+    <div class="row g-3 mb-3">
+        <div class="col-lg-4 col-xl-3">
+            @if (Bike.Images is not null && Bike.Images.Any())
+            {
+                <img src="@Bike.Images.First()" alt="@Bike.Model.Name" />
+            }
+        </div>
+        <div class="col-lg-4 col-xl-3">
+            <Card>
+                <CardTitle>@Bike.Model.Name</CardTitle>
+                <CardSubTitle>@Bike.Size (@Bike.Color)</CardSubTitle>
+                <CardBody>
+                    <div class="input-group mb-3">
+                        <NumberInput TValue="int"
+                                     @bind-Value="Feet"
+                                     Class="form-control"
+                                     aria-label="Rider's height (feet)"
+                                     aria-describedby="ft-text"/>
+                        <span class="input-group-text" id="ft-text">ft</span>
+                        <NumberInput TValue="int"
+                                     @bind-Value="Inches"
+                                     Class="form-control"
+                                     aria-label="Rider's height (inches)"
+                                     aria-describedby="in-text"/>
+                        <span class="input-group-text" id="in-text">in</span>
+                    </div>
+                    <NumberInput TValue="int"
+                                 @bind-Value="Feet"/>
 
-<div class="row g-3 mb-3">
-    <div class="col-lg-4 col-xl-3">
-        <img src="@Bike.Images.First()" alt="@Bike.Model.Name"/>
+                    <div class="input-group mb-3">
+                        <NumberInput TValue="int"
+                                     @bind-Value="Weight"
+                                     Class="form-control"
+                                     aria-label="Rider's weight in pounds"
+                                     aria-describedby="lbs-text"/>
+                        <span class="input-group-text" id="lbs-text">lbs</span>
+                    </div>
+                </CardBody>
+            </Card>
+        </div>
     </div>
-    <div class="col-lg-4 col-xl-3">
-        <Card>
-            <CardTitle>@Bike.Model.Name</CardTitle>
-            <CardSubTitle>@Bike.Size (@Bike.Color)</CardSubTitle>
-            <CardBody>
-                <div class="input-group mb-3">
-                    <NumberInput TValue="int"
-                                 @bind-Value="Feet"
-                                 Class="form-control"
-                                 aria-label="Rider's height (feet)"
-                                 aria-describedby="ft-text"/>
-                    <span class="input-group-text" id="ft-text">ft</span>
-                    <NumberInput TValue="int"
-                                 @bind-Value="Inches"
-                                 Class="form-control"
-                                 aria-label="Rider's height (inches)"
-                                 aria-describedby="in-text"/>
-                    <span class="input-group-text" id="in-text">in</span>
-                </div>
-                <NumberInput TValue="int"
-                             @bind-Value="Feet"/>
-
-                <div class="input-group mb-3">
-                    <NumberInput TValue="int"
-                                 @bind-Value="Weight"
-                                 Class="form-control"
-                                 aria-label="Rider's weight in pounds"
-                                 aria-describedby="lbs-text"/>
-                    <span class="input-group-text" id="lbs-text">lbs</span>
-                </div>
-            </CardBody>
-        </Card>
-    </div>
-</div>
+}
 
 @code {
 

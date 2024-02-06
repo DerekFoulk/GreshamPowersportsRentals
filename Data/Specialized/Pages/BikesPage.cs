@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using AngleSharp.Common;
 using Data.Husqvarna.Pages.Shared;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
@@ -21,6 +20,9 @@ namespace Data.Specialized.Pages
 
         public void GoToPage(int pageNumber = 1)
         {
+            if (pageNumber <= 0)
+                throw new ArgumentOutOfRangeException(nameof(pageNumber), $"'{nameof(pageNumber)}' must be greater than zero");
+
             var url = $"https://www.specialized.com/us/en/c/bikes?group=Bikes&group=E-Bikes&page={pageNumber}";
             
             Logger.LogTrace($"Navigating to the 'Bikes' page #{pageNumber} ('{url}')");
@@ -38,7 +40,7 @@ namespace Data.Specialized.Pages
 
             var stopwatch = Stopwatch.StartNew();
 
-            while (IsPageWithinRange(currentPageNumber, maxPage, minPage) && !IsLastPage())
+            while (!IsLastPage())
             {
                 if (stopwatch.Elapsed >= TimeSpan.FromMinutes(3))
                 {
@@ -47,14 +49,23 @@ namespace Data.Specialized.Pages
                     throw new TimeoutException($"Getting bike detail page URLs timed out after '{stopwatch.Elapsed}'");
                 }
 
-                var urls = GetBikeDetailUrlsFromPage(currentPageNumber);
+                if (IsPageWithinRange(currentPageNumber, maxPage, minPage))
+                {
+                    var urls = GetBikeDetailUrlsFromPage(currentPageNumber);
 
-                bikeDetailsPagesToScrape.AddRange(urls);
+                    bikeDetailsPagesToScrape.AddRange(urls);
+                }
 
                 var nextPage = currentPageNumber + 1;
 
-                if (IsPageWithinRange(nextPage, maxPage, minPage))
-                    GoToPage(nextPage);
+                if (nextPage > maxPage)
+                    break;
+
+                if (minPage is not null)
+                    if (nextPage < minPage)
+                        nextPage = (int)minPage;
+
+                GoToPage(nextPage);
 
                 currentPageNumber++;
             }
@@ -64,14 +75,24 @@ namespace Data.Specialized.Pages
 
         private bool IsPageWithinRange(int pageNumber, int? maxPage = null, int? minPage = null)
         {
-            var isPageWithinRange = maxPage == null && minPage == null;
+            if (maxPage is null && minPage is null)
+                return true;
 
-            if (maxPage != null)
-                isPageWithinRange = pageNumber <= maxPage;
-            if (minPage != null)
-                isPageWithinRange = pageNumber >= minPage;
+            if (maxPage is not null && minPage is not null)
+            {
+                if (maxPage < minPage)
+                    throw new ArgumentException($"'{nameof(maxPage)}' cannot be less than '{nameof(minPage)}'");
 
-            return isPageWithinRange;
+                return pageNumber >= minPage && pageNumber <= maxPage;
+            }
+
+            if (minPage is not null)
+                return pageNumber >= minPage;
+
+            if (maxPage is not null)
+                return pageNumber <= maxPage;
+
+            return false;
         }
 
         private int GoToNextPage(int currentPageNumber)

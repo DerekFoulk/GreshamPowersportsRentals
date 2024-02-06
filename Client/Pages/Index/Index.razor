@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inject ILogger<Index> Logger
+@inject HttpClient Http
 
 <PageTitle>Rentals - Gresham Powersports</PageTitle>
 
@@ -80,11 +81,13 @@
 
     public Category? SelectedCategory { get; set; }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         var now = DateTime.Now;
         var start = now.AddHours(1);
         var end = start.AddDays(1);
+
+        Rental = await GetSampleRentalAsync();
 
         Rental ??= new Rental
         {
@@ -93,6 +96,38 @@
             EndDate = DateOnly.FromDateTime(end),
             EndTime = TimeOnly.FromDateTime(end)
         };
+    }
+
+    private async Task<Rental> GetSampleRentalAsync()
+    {
+        Logger.LogTrace("Generating a sample rental");
+
+        var start = DateTime.Now.AddDays(3);
+        Logger.LogTrace($"Starts: {start}");
+
+        var end = DateTime.Now.AddDays(3);
+        Logger.LogTrace($"Ends: {end}");
+
+        Logger.LogTrace("Getting bikes from the Bikes API");
+
+        var bikes = await Http.GetFromJsonAsync<Bike[]>("/api/Bikes") ?? new Bike[] { };
+
+        Logger.LogTrace($"Received {bikes.Length} from the Bikes API");
+
+        var rental = new Rental
+        {
+            StartDate = DateOnly.FromDateTime(start),
+            StartTime = TimeOnly.FromDateTime(start),
+            EndDate = DateOnly.FromDateTime(end),
+            EndTime = TimeOnly.FromDateTime(end),
+            Bikes = bikes.Where(x => x is not null && x.IsAvailable).Take(3).ToList()
+        };
+
+        Logger.LogTrace("Sample rental was generated successfully");
+        
+        Logger.LogTrace(rental.ToString());
+
+        return rental;
     }
 
     private void Submit()

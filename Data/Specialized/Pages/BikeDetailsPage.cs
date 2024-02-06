@@ -1,7 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
+using System.Reflection;
 using System.Text;
+using Bogus.DataSets;
 using Data.Extensions;
 using Data.Pages;
 using Data.Specialized.Exceptions;
@@ -11,14 +14,19 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.PageObjects;
 using SeleniumExtras.WaitHelpers;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Data.Specialized.Pages
 {
     public class BikeDetailsPage : BasePage<BikeDetailsPage>
     {
+        private List<ModelConfiguration> _modelConfigurations = new();
+
         public BikeDetailsPage(ILogger logger, IWebDriver webDriver) : base(logger, webDriver)
         {
         }
+
+        #region Properties
 
         [FindsBy(How = How.CssSelector, Using = "nav[aria-label=\"breadcrumb\"] li")]
         public IList<IWebElement>? Breadcrumbs { get; set; }
@@ -35,7 +43,7 @@ namespace Data.Specialized.Pages
         [FindsBy(How = How.CssSelector, Using = "div.sc-7881ce43-5.kNHxFW h5")]
         public IList<IWebElement>? Prices { get; set; }
 
-        [FindsBy(How = How.CssSelector, Using = ".sc-e4145e4c-3.dNviJe div")]
+        [FindsBy(How = How.CssSelector, Using = ".sc-728866e0-3.FBCRN div")]
         public IWebElement? Description { get; set; }
 
         [FindsBy(How = How.CssSelector, Using = "div[data-component=\"color-selection\"] button")]
@@ -44,8 +52,8 @@ namespace Data.Specialized.Pages
         [FindsBy(How = How.CssSelector, Using = "p.sc-e4145e4c-10.fhNxpW")]
         public IWebElement? ColorLabel { get; set; }
 
-        [FindsBy(How = How.CssSelector, Using = "div[data-component=\"size-selection\"] button")]
-        public IList<IWebElement>? SizeButtons { get; set; }
+        [FindsBy(How = How.CssSelector, Using = "div[data-component=\"size-selection\"]")]
+        public IWebElement? SizeSelection { get; set; }
 
         [FindsBy(How = How.CssSelector, Using = "button.sc-d636bba-0.sc-d636bba-3.qDQJb.bzPHbY")]
         public IWebElement? ReadMoreButton { get; set; }
@@ -55,6 +63,8 @@ namespace Data.Specialized.Pages
 
         [FindsBy(How = How.CssSelector, Using = "div[data-component=\"technical-specifications-accordion\"]")]
         public IWebElement? TechnicalSpecificationsAccordion { get; set; }
+
+        #endregion
 
         public Model GetBikeDetails()
         {
@@ -157,63 +167,106 @@ namespace Data.Specialized.Pages
 
             WaitForPageToLoad();
 
-            if (SizeButtons is null)
-                throw new NullReferenceException($"'{nameof(SizeButtons)}' cannot be null");
-
             if (ColorButtons is null)
                 throw new NullReferenceException($"'{nameof(ColorButtons)}' cannot be null");
 
-            var modelConfigurations = new List<ModelConfiguration>();
-
             //var geometryTable = GetGeometryTable();
 
-            AddColorsAndSizesTo(modelConfigurations);
+            AddColorsAndSizesTo();
             
-            return modelConfigurations;
+            return _modelConfigurations;
         }
 
-        private void IterateSizes(string color, IEnumerable<string> images, List<ModelConfiguration> modelConfigurations)
+        private void IterateSizes(string color, IReadOnlyCollection<string> images)
         {
-            if (SizeButtons is null)
-                throw new NullReferenceException($"'{nameof(SizeButtons)}' cannot be null");
+            var sizeButtons = SizeSelection?.FindElements(By.CssSelector("button"));
+            
+            if (sizeButtons is null)
+                throw new NullReferenceException($"'{nameof(sizeButtons)}' cannot be null");
+            
+            foreach (var sizeButton in sizeButtons)
+            {
+                TryAddModelConfiguration(color, images, sizeButton);
+            }
+        }
 
-            foreach (var sizeButton in SizeButtons)
+        private void TryAddModelConfiguration(string color, IEnumerable<string> images, IWebElement sizeButton)
+        {
+            try
+            {
+                AddModelConfiguration(color, images, sizeButton);
+            }
+            catch (Exception e)
+            {
+                Logger.LogWarning(e, $"Failed to add model configuration: '{color}/{sizeButton.Text}'");
+
+                throw;
+            }
+        }
+
+        private void AddModelConfiguration(string color, IEnumerable<string> images, IWebElement sizeButton)
+        {
+            try
             {
                 Logger.LogTrace($"Scrolling to '{nameof(sizeButton)}'");
 
                 WebDriver.ScrollToElement(sizeButton);
+            }
+            catch (Exception e)
+            {
+                var stringBuilder = new StringBuilder();
+                stringBuilder.AppendLine($"Bike Details Page ({WebDriver.Url}):");
+                stringBuilder.AppendLine($"Failed to scroll to '{nameof(sizeButton)}'");
+                Logger.LogWarning(stringBuilder.ToString());
 
+                WebDriver.CaptureHtmlAndScreenshot(e, GetType(), MethodBase.GetCurrentMethod(), Logger);
+            }
+
+            try
+            {
                 Logger.LogTrace($"Clicking '{sizeButton.Text}' button");
 
                 sizeButton.Click();
-
-                var size = sizeButton.Text;
-
-                Logger.LogTrace($"Size: {size}");
-
-                //var geometry = GetGeometryFromGeometryTable(size, geometryTable);
-
-                Logger.LogDebug($"Getting configuration for '{color}'/'{size}'");
-
-                var partNumber = GetPartNumber();
-
-                var pricing = GetPricing();
-
-                var modelConfiguration = new ModelConfiguration(
-                    partNumber,
-                    pricing,
-                    color,
-                    images,
-                    size
-                    // TODO: Fix JSON issues with geometry, then uncomment
-                    //geometry
-                );
-
-                modelConfigurations.Add(modelConfiguration);
             }
+            catch (Exception e)
+            {
+                var stringBuilder = new StringBuilder();
+                stringBuilder.AppendLine($"Bike Details Page ({WebDriver.Url}):");
+                stringBuilder.AppendLine($"Failed to click '{sizeButton.Text}'");
+                Logger.LogWarning(stringBuilder.ToString());
+
+                WebDriver.CaptureHtmlAndScreenshot(e, GetType(), MethodBase.GetCurrentMethod(), Logger);
+
+                throw;
+            }
+
+            var size = sizeButton.Text;
+
+            Logger.LogTrace($"Size: {size}");
+
+            //var geometry = GetGeometryFromGeometryTable(size, geometryTable);
+
+            Logger.LogDebug($"Getting configuration for '{color}'/'{size}'");
+
+            var partNumber = GetPartNumber();
+
+            var pricing = GetPricing();
+
+            var modelConfiguration = new ModelConfiguration(
+            partNumber,
+            pricing,
+                color,
+                images,
+                size
+            // TODO: Fix JSON issues with geometry, then uncomment
+            //geometry
+            );
+
+            if (!_modelConfigurations.Any(x => x.PartNumber.Equals(partNumber)))
+                _modelConfigurations.Add(modelConfiguration);
         }
 
-        private void AddColorsAndSizesTo(List<ModelConfiguration> modelConfigurations)
+        private void AddColorsAndSizesTo()
         {
             if (ColorButtons is null)
                 throw new NullReferenceException($"'{nameof(ColorButtons)}' cannot be null");
@@ -251,7 +304,7 @@ namespace Data.Specialized.Pages
                 // TODO: Move this to a color only loop as we don't need images for each color/size combination (I think)
                 var images = GetImages();
 
-                IterateSizes(color, images, modelConfigurations);
+                IterateSizes(color, images);
             }
         }
 
@@ -347,7 +400,7 @@ namespace Data.Specialized.Pages
         }
 
         private GeometryTableRow GetGeometryTableRow(IWebElement row, int rowIndex,
-            List<string> columnHeaderValues)
+            IReadOnlyCollection<string> columnHeaderValues)
         {
             ArgumentNullException.ThrowIfNull(row);
 
@@ -406,7 +459,7 @@ namespace Data.Specialized.Pages
             Logger.LogTrace($"Page loaded after '{stopwatch.Elapsed}'");
         }
 
-        private void ThrowIfTableLayoutIsUnexpected(ReadOnlyCollection<IWebElement> columns)
+        private void ThrowIfTableLayoutIsUnexpected(IReadOnlyCollection<IWebElement> columns)
         {
             Logger.LogTrace("Validating table layout");
 
@@ -452,7 +505,7 @@ namespace Data.Specialized.Pages
             Logger.LogTrace("Table structure is valid");
         }
 
-        private IEnumerable<string> GetImages()
+        private List<string> GetImages()
         {
             Logger.LogDebug($"Getting images from '{nameof(Gallery)}'");
 

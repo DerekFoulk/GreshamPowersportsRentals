@@ -10,6 +10,8 @@ using System.Text;
 using Data.Options;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Firefox;
 
 namespace Data.Specialized.Services
 {
@@ -32,27 +34,32 @@ namespace Data.Specialized.Services
 
             var models = new List<Model>();
 
-            var webDriver = _webDriverFactory.GetWebDriver<EdgeDriver>(
+            var webDriver = _webDriverFactory.GetWebDriver<FirefoxDriver>(
                 TimeSpan.FromSeconds(_webDriverOptions.ImplicitWaitInSeconds), _webDriverOptions.Headless);
 
             try
             {
                 var bikesPage = new BikesPage(_logger, webDriver);
 
-                var urls = bikesPage.GetBikeDetailUrlsAcrossPages().Distinct().ToList();
+                var urls = bikesPage.GetBikeDetailUrlsAcrossPages(7, 7).Distinct().ToList();
 
                 _logger.LogDebug($"Found {urls.Count} bike details page URLs to scrape");
 
                 foreach (var url in urls)
                 {
+                    _logger.LogDebug($"Getting bike details #{urls.IndexOf(url)} ({url})");
+
                     var bikeDetails = GetBikeDetails(url, webDriver);
 
                     models.Add(bikeDetails);
                 }
+
+                _logger.LogDebug("Finished getting bike details");
             }
             catch (Exception e)
             {
-                webDriver.CaptureHtmlAndScreenshot(e, GetType(), MethodBase.GetCurrentMethod());
+                if (e is WebDriverException)
+                    webDriver.CaptureHtmlAndScreenshot(e, GetType(), MethodBase.GetCurrentMethod());
 
                 _logger.LogError(e, "Failed to scrape bikes from Specialized's website");
 
@@ -72,11 +79,15 @@ namespace Data.Specialized.Services
 
         private async Task SaveBikesAsJsonAsync(List<Model> bikes)
         {
+            const string path = @"R:\GreshamPowersportsRentals\Api\Specialized.json";
+
+            _logger.LogDebug($"Saving bikes to JSON ('{path}')");
+
             //await using var fileStream = File.Create("Specialized.json");
             //await JsonSerializer.SerializeAsync(fileStream, bikes);
 
             var json = JsonConvert.SerializeObject(bikes);
-            await File.WriteAllTextAsync(@"R:\GreshamPowersportsRentals\Api\Specialized.json", json, Encoding.UTF8);
+            await File.WriteAllTextAsync(path, json, Encoding.UTF8);
         }
 
         private bool TryGetBikeDetails(string url, IWebDriver webDriver, out Model? bikeDetails)

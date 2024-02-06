@@ -29,6 +29,6 @@ public class Bike
 
     public override string ToString()
     {
-        return $"{Model.Manufacturer.Name} {Model.Name} ({Size})";
+        return $"{Model?.Manufacturer?.Name} {Model?.Name} ({Size})";
     }
 }

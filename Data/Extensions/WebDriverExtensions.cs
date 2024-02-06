@@ -1,5 +1,8 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using System.Reflection;
+using ByteSizeLib;
+using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
@@ -52,17 +55,21 @@ namespace Data.Extensions
             }
         }
 
-        public static void CaptureHtmlAndScreenshot(this IWebDriver webDriver, Exception exception, Type type, MethodBase? method, bool clean = false)
+        public static void CaptureHtmlAndScreenshot(this IWebDriver webDriver, Exception exception, Type type, MethodBase? method, ILogger? logger = null)
         {
             var name = $"{DateTime.Now:yyyyMMddHHmmss}_{exception.GetType().FullName}_{type.FullName}_{method?.Name}";
             CaptureHtmlAndScreenshot(webDriver, name);
         }
 
-        public static void CaptureHtmlAndScreenshot(this IWebDriver webDriver, string name)
+        public static void CaptureHtmlAndScreenshot(this IWebDriver webDriver, string name, ILogger? logger = null)
         {
+            logger?.LogDebug($"Capturing HTML and screenshot as '{name}'");
+
             var captureHtmlTask = Task.Run(() =>
             {
                 var html = webDriver.PageSource;
+
+                logger?.LogTrace($"Captured '{html.Length}' characters of HTML");
 
                 return html;
             });
@@ -71,16 +78,27 @@ namespace Data.Extensions
             {
                 var screenshot = webDriver.TakeScreenshot();
 
+                logger?.LogTrace($"Captured screenshot ({ByteSize.FromBytes(screenshot.AsByteArray.Length).KiloBytes} kB)");
+
                 return screenshot;
             });
 
             Task.WaitAll(captureHtmlTask, captureScreenshotTask);
 
-            var directoryPath = $"SeleniumCaptures/{name}/";
+            var tempDirectoryPath = Path.Combine(Path.GetTempPath(), "GreshamPowersportsRentals");
+            var directoryPath = Path.Combine(tempDirectoryPath, "SeleniumCaptures", name);
             var directoryInfo = new DirectoryInfo(directoryPath);
 
+            logger?.LogTrace($"Saving capture as '{name}' ('{directoryInfo.FullName}')");
+
             if (!directoryInfo.Exists)
+            {
+                logger?.LogTrace($"'{directoryInfo.FullName}' does not exist");
+
                 directoryInfo.Create();
+
+                logger?.LogTrace($"Created '{directoryInfo.FullName}'");
+            }
 
             var saveHtmlTask = Task.Run(() =>
             {
@@ -88,6 +106,8 @@ namespace Data.Extensions
                 var htmlFilePath = Path.Combine(directoryPath, $"{name}.html");
 
                 File.WriteAllText(htmlFilePath, html);
+
+                logger?.LogTrace($"Saved HTML as '{htmlFilePath}'");
             });
 
             var saveScreenshotTask = Task.Run(() =>
@@ -96,9 +116,15 @@ namespace Data.Extensions
                 var screenshotFilePath = Path.Combine(directoryPath, $"{name}.png");
 
                 screenshot.SaveAsFile(screenshotFilePath);
+
+                logger?.LogTrace($"Saved screenshot as '{screenshotFilePath}'");
             });
 
             Task.WaitAll(saveHtmlTask, saveScreenshotTask);
+
+            logger?.LogTrace($"Opening '{directoryPath}'");
+
+            OpenDirection(directoryPath);
         }
 
         public static void SetPosition(this IWebDriver webDriver, int displayOnMonitor, int resolutionX, bool maximize = false)
@@ -164,6 +190,21 @@ namespace Data.Extensions
 
             if (!implicitWaitTimeout.Equals(timeouts.ImplicitWait))
                 webDriver.Manage().Timeouts().ImplicitWait = implicitWaitTimeout;
+        }
+
+        private static void OpenDirection(string directoryPath)
+        {
+            Process.Start("explorer", directoryPath);
+        }
+
+        private static void OpenFile(string directoryPath)
+        {
+            var startInfo = new ProcessStartInfo(directoryPath)
+            {
+                UseShellExecute = true
+            };
+
+            Process.Start(startInfo);
         }
     }
 }

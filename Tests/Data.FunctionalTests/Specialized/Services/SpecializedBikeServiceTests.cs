@@ -16,7 +16,7 @@ namespace Data.FunctionalTests.Specialized.Services
         private readonly int _maxDepth = AssertionOptions.FormattingOptions.MaxDepth;
         private readonly int _maxLines = AssertionOptions.FormattingOptions.MaxLines;
 
-        public SpecializedBikeServiceTests(ITestOutputHelper output) : base(output, LogLevel.Information)
+        public SpecializedBikeServiceTests(ITestOutputHelper output) : base(output, LogLevel.Debug)
         {
             AssertionOptions.FormattingOptions.MaxDepth = 1;
             AssertionOptions.FormattingOptions.MaxLines = int.MaxValue;
@@ -41,7 +41,7 @@ namespace Data.FunctionalTests.Specialized.Services
             var mockOptionsSnapshot = new Mock<IOptionsSnapshot<WebDriverOptions>>();
             var webDriverOptions = new WebDriverOptions
             {
-                Headless = true,
+                Headless = false,
                 ImplicitWaitInSeconds = 3
             };
             mockOptionsSnapshot.Setup(x => x.Value)

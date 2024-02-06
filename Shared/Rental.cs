@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 
 namespace BlazorApp.Shared
 {
@@ -23,5 +24,19 @@ namespace BlazorApp.Shared
 
         [Required]
         public List<Bike> Bikes { get; set; } = new();
+
+        public override string ToString()
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine($"Rental #{Id}");
+            stringBuilder.AppendLine($"Starts: {StartDate.ToDateTime(StartTime)}");
+            stringBuilder.AppendLine($"Ends: {EndDate.ToDateTime(EndTime)}");
+            stringBuilder.AppendLine("Bikes:");
+
+            foreach (var bike in Bikes)
+                stringBuilder.AppendLine(bike.ToString());
+
+            return stringBuilder.ToString();
+        }
     }
 }
