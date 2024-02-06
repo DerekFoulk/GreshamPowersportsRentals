@@ -28,7 +28,7 @@ namespace Data.Specialized.Services
             _webDriverFactory = webDriverFactory;
         }
 
-        public async Task<IEnumerable<Model>> GetModelsAsync()
+        public async Task<IEnumerable<Model>> GetModelsAsync(int? maxPage = null, int? minPage = null)
         {
             _logger.LogDebug("Getting bikes from Specialized's website");
 
@@ -41,7 +41,9 @@ namespace Data.Specialized.Services
             {
                 var bikesPage = new BikesPage(_logger, webDriver);
 
-                var urls = bikesPage.GetBikeDetailUrlsAcrossPages(7, 7).Distinct().ToList();
+                bikesPage.GoToPage(minPage ?? 1);
+
+                var urls = bikesPage.GetBikeDetailUrlsAcrossPages(maxPage, minPage).Distinct().ToList();
 
                 _logger.LogDebug($"Found {urls.Count} bike details page URLs to scrape");
 

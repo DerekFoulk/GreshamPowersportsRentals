@@ -40,10 +40,10 @@ namespace Data.Specialized.Pages
         [FindsBy(How = How.CssSelector, Using = "div[data-component=\"product-detail-header\"]")]
         public IWebElement? ProductDetailHeader { get; set; }
 
-        [FindsBy(How = How.CssSelector, Using = "div.sc-7881ce43-5.kNHxFW h5")]
+        [FindsBy(How = How.CssSelector, Using = "div.sc-da4e96c9-5.jtZKRU h5")]
         public IList<IWebElement>? Prices { get; set; }
 
-        [FindsBy(How = How.CssSelector, Using = ".sc-728866e0-3.FBCRN div")]
+        [FindsBy(How = How.CssSelector, Using = ".sc-c8e79f37-3.fBteXT div")]
         public IWebElement? Description { get; set; }
 
         [FindsBy(How = How.CssSelector, Using = "div[data-component=\"color-selection\"] button")]
@@ -52,8 +52,8 @@ namespace Data.Specialized.Pages
         [FindsBy(How = How.CssSelector, Using = "p.sc-e4145e4c-10.fhNxpW")]
         public IWebElement? ColorLabel { get; set; }
 
-        [FindsBy(How = How.CssSelector, Using = "div[data-component=\"size-selection\"]")]
-        public IWebElement? SizeSelection { get; set; }
+        [FindsBy(How = How.CssSelector, Using = "div[data-component=\"size-selection\"] button")]
+        public IList<IWebElement>? SizeButtons { get; set; }
 
         [FindsBy(How = How.CssSelector, Using = "button.sc-d636bba-0.sc-d636bba-3.qDQJb.bzPHbY")]
         public IWebElement? ReadMoreButton { get; set; }
@@ -167,6 +167,9 @@ namespace Data.Specialized.Pages
 
             WaitForPageToLoad();
 
+            if (SizeButtons is null)
+                throw new NullReferenceException($"'{nameof(SizeButtons)}' cannot be null");
+
             if (ColorButtons is null)
                 throw new NullReferenceException($"'{nameof(ColorButtons)}' cannot be null");
 
@@ -179,12 +182,10 @@ namespace Data.Specialized.Pages
 
         private void IterateSizes(string color, IReadOnlyCollection<string> images)
         {
-            var sizeButtons = SizeSelection?.FindElements(By.CssSelector("button"));
-            
-            if (sizeButtons is null)
-                throw new NullReferenceException($"'{nameof(sizeButtons)}' cannot be null");
-            
-            foreach (var sizeButton in sizeButtons)
+            if (SizeButtons is null)
+                throw new NullReferenceException($"'{nameof(SizeButtons)}' cannot be null");
+
+            foreach (var sizeButton in SizeButtons)
             {
                 TryAddModelConfiguration(color, images, sizeButton);
             }
@@ -192,13 +193,15 @@ namespace Data.Specialized.Pages
 
         private void TryAddModelConfiguration(string color, IEnumerable<string> images, IWebElement sizeButton)
         {
+            var size = sizeButton.Text;
+
             try
             {
                 AddModelConfiguration(color, images, sizeButton);
             }
             catch (Exception e)
             {
-                Logger.LogWarning(e, $"Failed to add model configuration: '{color}/{sizeButton.Text}'");
+                Logger.LogWarning(e, $"Failed to add model configuration: '{color}/{size}'");
 
                 throw;
             }

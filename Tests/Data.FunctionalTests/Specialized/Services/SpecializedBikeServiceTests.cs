@@ -16,7 +16,7 @@ namespace Data.FunctionalTests.Specialized.Services
         private readonly int _maxDepth = AssertionOptions.FormattingOptions.MaxDepth;
         private readonly int _maxLines = AssertionOptions.FormattingOptions.MaxLines;
 
-        public SpecializedBikeServiceTests(ITestOutputHelper output) : base(output, LogLevel.Debug)
+        public SpecializedBikeServiceTests(ITestOutputHelper output) : base(output, LogLevel.Trace)
         {
             AssertionOptions.FormattingOptions.MaxDepth = 1;
             AssertionOptions.FormattingOptions.MaxLines = int.MaxValue;
@@ -49,7 +49,7 @@ namespace Data.FunctionalTests.Specialized.Services
             var specializedBikesService = new SpecializedBikesService(Logger, mockOptionsSnapshot.Object, webDriverFactory);
 
             // Act
-            var models = (await specializedBikesService.GetModelsAsync()).ToList();
+            var models = (await specializedBikesService.GetModelsAsync(7, 7)).ToList();
 
             // Assert
             models.Should()

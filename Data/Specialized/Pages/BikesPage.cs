@@ -12,7 +12,6 @@ namespace Data.Specialized.Pages
     {
         public BikesPage(ILogger logger, IWebDriver webDriver) : base(logger, webDriver)
         {
-            GoToPage();
         }
 
         [FindsBy(How = How.CssSelector, Using = "[data-component=\"product-tile\"]")]
@@ -38,10 +37,14 @@ namespace Data.Specialized.Pages
 
             var currentPageNumber = GetCurrentPageNumberFromUrl();
 
+            Logger.LogTrace($"Getting bike detail page URLs from page #{currentPageNumber}");
+
             var stopwatch = Stopwatch.StartNew();
 
             while (!IsLastPage())
             {
+                currentPageNumber = GetCurrentPageNumberFromUrl();
+
                 if (stopwatch.Elapsed >= TimeSpan.FromMinutes(3))
                 {
                     stopwatch.Stop();
@@ -66,8 +69,6 @@ namespace Data.Specialized.Pages
                         nextPage = (int)minPage;
 
                 GoToPage(nextPage);
-
-                currentPageNumber++;
             }
 
             return bikeDetailsPagesToScrape;
@@ -202,15 +203,23 @@ namespace Data.Specialized.Pages
 
         private bool IsLastPage()
         {
+            var newImplicitWait = TimeSpan.FromSeconds(2);
+            
+            Logger.LogTrace($"Temporarily setting implicit wait timeout to '{newImplicitWait}'");
+            
             var implicitWait = WebDriver.Manage().Timeouts().ImplicitWait;
             
-            WebDriver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(2);
+            WebDriver.Manage().Timeouts().ImplicitWait = newImplicitWait;
 
             Logger.LogTrace("Checking if the current page is the last page");
 
             try
             {
-                WebDriver.FindElement(By.CssSelector("button.sc-b650d9bf-0.cAXHmd"));
+                Logger.LogTrace("Looking for 'next page' button");
+
+                WebDriver.FindElement(By.CssSelector("button.sc-aecdb1f6-0.hHInlF"));
+
+                Logger.LogTrace("Found the 'next page' button");
 
                 Logger.LogTrace("Is not the last page");
 
@@ -218,14 +227,14 @@ namespace Data.Specialized.Pages
             }
             catch (NoSuchElementException)
             {
-                //WebDriver.FindElement(By.CssSelector("button.sc-b650d9bf-0.cKfDgr"));
-
                 Logger.LogTrace("Is the last page");
 
                 return true;
             }
             finally
             {
+                Logger.LogTrace($"Resetting implicit wait timeout to '{implicitWait}'");
+
                 WebDriver.Manage().Timeouts().ImplicitWait = implicitWait;
             }
         }
