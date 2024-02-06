@@ -14,64 +14,63 @@
             <DataAnnotationsValidator />
             <ValidationSummary />
             
-            <CascadingValue Value="Rental">
-                <div class="row g-3 mb-3">
-                    <div class="col-12">
-                        <h2>Choose Dates</h2>
-                    </div>
-                    @* ReSharper disable once Html.IdNotResolved *@
-                    <label for="start-date" class="col-sm-2 col-form-label text-bold">From</label>
-                    <div class="col-sm-5 col-md-4 col-lg-3 col-xl-2">
-                        <DateInput ElementId="start-date"
-                                   TValue="DateOnly"
-                                   @bind-Value="@Rental.StartDate"
-                                   Placeholder="Enter a Start Date" />
-                    </div>
-                    <div class="col-sm-5 col-md-4 col-lg-3 col-xl-2">
-                        <TimeInput ElementId="start-time"
-                                   TValue="TimeOnly"
-                                   @bind-Value="@Rental.StartTime"
-                                   Placeholder="Enter a Start Time" />
+            <div class="row g-3 mb-3">
+                <div class="col-12">
+                    <h2>Choose Dates</h2>
+                </div>
+                @* ReSharper disable once Html.IdNotResolved *@
+                <label for="start-date" class="col-sm-2 col-form-label text-bold">From</label>
+                <div class="col-sm-5 col-md-4 col-lg-3 col-xl-2">
+                    <DateInput ElementId="start-date"
+                               TValue="DateOnly"
+                               @bind-Value="@Rental.StartDate"
+                               Placeholder="Enter a Start Date" />
+                </div>
+                <div class="col-sm-5 col-md-4 col-lg-3 col-xl-2">
+                    <TimeInput ElementId="start-time"
+                               TValue="TimeOnly"
+                               @bind-Value="@Rental.StartTime"
+                               Placeholder="Enter a Start Time" />
+                </div>
+            </div>
+            <div class="row g-3 mb-3">
+                @* ReSharper disable once Html.IdNotResolved *@
+                <label for="end-date" class="col-sm-2 col-form-label">To</label>
+                <div class="col-sm-5 col-md-4 col-lg-3 col-xl-2">
+                    <DateInput ElementId="end-date"
+                               TValue="DateOnly"
+                               @bind-Value="@Rental.EndDate"
+                               Placeholder="Enter Date" />
+                </div>
+                <div class="col-sm-5 col-md-4 col-lg-3 col-xl-2">
+                    <TimeInput ElementId="end-time"
+                               TValue="TimeOnly"
+                               @bind-Value="@Rental.EndTime"
+                               Placeholder="Enter a End Time" />
+                </div>
+                <div class="col-12">
+                    <h2>Type of Bike</h2>
+                </div>
+                <div class="col-12">
+                    <CategorySelector @bind-SelectedCategory="@SelectedCategory" />
+                </div>
+                <div class="col-12">
+                    <ModelSelector Category="SelectedCategory"
+                                   Rental="@Rental" />
+                </div>
+                <div class="col-12">
+                    <Cart Rental="@Rental" />
+                </div>
+                <div class="col-12">
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        @* ReSharper disable once Html.AttributeValueNotResolved *@
+                        <Button Type="ButtonType.Submit"
+                                Color="ButtonColor.Primary">
+                            Submit
+                        </Button>
                     </div>
                 </div>
-                <div class="row g-3 mb-3">
-                    @* ReSharper disable once Html.IdNotResolved *@
-                    <label for="end-date" class="col-sm-2 col-form-label">To</label>
-                    <div class="col-sm-5 col-md-4 col-lg-3 col-xl-2">
-                        <DateInput ElementId="end-date"
-                                   TValue="DateOnly"
-                                   @bind-Value="@Rental.EndDate"
-                                   Placeholder="Enter Date" />
-                    </div>
-                    <div class="col-sm-5 col-md-4 col-lg-3 col-xl-2">
-                        <TimeInput ElementId="end-time"
-                                   TValue="TimeOnly"
-                                   @bind-Value="@Rental.EndTime"
-                                   Placeholder="Enter a End Time" />
-                    </div>
-                    <div class="col-12">
-                        <h2>Type of Bike</h2>
-                    </div>
-                    <div class="col-12">
-                        <CategorySelector @bind-Category="SelectedCategory" />
-                    </div>
-                    <div class="col-12">
-                        <ModelSelector Category="SelectedCategory" />
-                    </div>
-                    <div class="col-12">
-                        <Cart />
-                    </div>
-                    <div class="col-12">
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            @* ReSharper disable once Html.AttributeValueNotResolved *@
-                            <Button Type="ButtonType.Submit"
-                                    Color="ButtonColor.Primary">
-                                Submit
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </CascadingValue>
+            </div>
         </EditForm>
     }
 </div>

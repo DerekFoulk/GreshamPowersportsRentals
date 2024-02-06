@@ -12,7 +12,8 @@
         @foreach (var model in _models)
         {
             <div class="col-12">
-                <ModelDetails Model="@model"/>
+                <ModelDetails Model="@model"
+                              Rental="@Rental"/>
             </div>
         }
     </div>
@@ -26,6 +27,13 @@
     [Parameter]
     [EditorRequired]
     public Category? Category { get; set; }
+
+    [Parameter]
+    [EditorRequired]
+    public Rental? Rental { get; set; }
+
+    [Parameter]
+    public EventCallback<Rental?> RentalChanged { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {

@@ -68,7 +68,7 @@ namespace Api
                 .RuleFor(x => x.EndDate, (f, x) => f.Date.SoonDateOnly(7, x.StartDate))
                 .RuleFor(x => x.EndTime,
                     f => f.Date.BetweenTimeOnly(TimeOnly.Parse("9:00 AM"), TimeOnly.Parse("5:00 PM")))
-                .RuleFor(x => x.Bikes, f => f.PickRandom(bikes, f.Random.Number(1, 4)))
+                .RuleFor(x => x.Bikes, f => f.PickRandom(bikes, f.Random.Number(1, 4)).ToList())
                 .Generate(10);
             
             Rentals = rentals;

@@ -40,13 +40,13 @@
 </div>
 
 @code {
-    // [Parameter]
-    // public EventCallback<Category> CategorySelected { get; set; }
-
     private Category[]? _categories;
 
     [Parameter]
     public Category? SelectedCategory { get; set; }
+
+    [Parameter]
+    public EventCallback<Category?> SelectedCategoryChanged { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -67,6 +67,6 @@
 
         SelectedCategory = category;
 
-        // CategorySelected.InvokeAsync(SelectedCategory);
+        SelectedCategoryChanged.InvokeAsync(SelectedCategory);
     }
 }

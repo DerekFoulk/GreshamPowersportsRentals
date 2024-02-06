@@ -2,6 +2,15 @@
 
 @if (Rental is not null)
 {
+    <div class="row g-3 mb-3">
+        <div class="col-lg-8">
+            <h1>
+                @Rental.StartDate @@ @Rental.StartTime
+                <small class="text-muted">@Rental.EndDate @@ @Rental.EndTime</small>
+            </h1>
+        </div>
+        <div class="col-lg-4"></div>
+    </div>
     if (!Rental.Bikes.Any())
     {
         <Alert Color="AlertColor.Secondary">
@@ -19,5 +28,30 @@
 }
 
 @code {
+    [Parameter]
+    [EditorRequired]
     public Rental? Rental { get; set; }
+
+    [Parameter]
+    public EventCallback<Rental?> RentalChanged { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        return base.SetParametersAsync(parameters);
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+    }
 }

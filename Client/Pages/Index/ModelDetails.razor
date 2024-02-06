@@ -88,13 +88,16 @@
 }
 
 @code {
-    [CascadingParameter]
+    [Parameter]
     [EditorRequired]
     public Rental? Rental { get; set; }
 
     [Parameter]
     [EditorRequired]
     public Model? Model { get; set; }
+
+    [Parameter]
+    public EventCallback<Rental?> RentalChanged { get; set; }
 
     public Bike? SelectedBike { get; set; }
 
@@ -169,6 +172,8 @@
         Logger.LogTrace($"Adding '{SelectedBike}' to the rental");
 
         Rental.Bikes.Add(SelectedBike);
+
+        RentalChanged.InvokeAsync(Rental);
     }
 
 }
