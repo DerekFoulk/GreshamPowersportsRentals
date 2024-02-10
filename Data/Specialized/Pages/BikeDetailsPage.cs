@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
 using System.Text;
-using AngleSharp.Dom;
 using Data.Extensions;
 using Data.Pages;
 using Data.Specialized.Exceptions;
@@ -62,7 +61,7 @@ namespace Data.Specialized.Pages
 
         #endregion
 
-        public Model GetBikeDetails()
+        public SpecializedModel GetBikeDetails()
         {
             Logger.LogDebug("Getting bike details");
 
@@ -89,7 +88,7 @@ namespace Data.Specialized.Pages
 
             var breadcrumbs = GetBreadcrumbs();
 
-            var model = new Model(url, name, description, technicalSpecifications, manualDownloads, modelConfigurations, videos, breadcrumbs);
+            var model = new SpecializedModel(url, name, description, technicalSpecifications, manualDownloads, modelConfigurations, videos, breadcrumbs);
             
             return model;
         }

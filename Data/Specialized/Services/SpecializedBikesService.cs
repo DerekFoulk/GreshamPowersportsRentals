@@ -25,11 +25,11 @@ namespace Data.Specialized.Services
             _webDriver = webDriverFactory.GetWebDriver(TimeSpan.FromSeconds(webDriverOptions.ImplicitWaitInSeconds), webDriverOptions.Headless);
         }
 
-        public async Task<IEnumerable<Model>> GetModelsAsync(int? maxPage = null, int? minPage = null)
+        public async Task<IEnumerable<SpecializedModel>> GetModelsAsync(int? maxPage = null, int? minPage = null)
         {
             _logger.LogDebug("Getting bikes from Specialized's website");
 
-            var models = new List<Model>();
+            var models = new List<SpecializedModel>();
 
             try
             {
@@ -71,7 +71,7 @@ namespace Data.Specialized.Services
             return models;
         }
 
-        public Model GetModel(string url)
+        public SpecializedModel GetModel(string url)
         {
             _logger.LogDebug($"Getting bike details from '{url}'");
 
@@ -81,7 +81,7 @@ namespace Data.Specialized.Services
             return bikeDetails;
         }
 
-        private async Task SaveBikesAsJsonAsync(List<Model> bikes)
+        private async Task SaveBikesAsJsonAsync(List<SpecializedModel> bikes)
         {
             const string path = @"R:\GreshamPowersportsRentals\Api\Specialized.json";
 

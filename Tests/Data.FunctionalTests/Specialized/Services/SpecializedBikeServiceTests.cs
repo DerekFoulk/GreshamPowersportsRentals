@@ -83,7 +83,7 @@ public class SpecializedBikeServiceTests : LoggingTestsBase<SpecializedBikesServ
         ModelAssertions(model);
     }
 
-    private void ModelAssertions(Model model)
+    private void ModelAssertions(SpecializedModel model)
     {
         model.Name.Should()
             .NotBeNullOrWhiteSpace();
