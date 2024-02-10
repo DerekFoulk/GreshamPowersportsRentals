@@ -96,29 +96,6 @@ namespace Data.Specialized.Services
             await File.WriteAllTextAsync(path, json, Encoding.UTF8);
         }
 
-        private bool TryGetBikeDetails(string url, IWebDriver webDriver, out Model? bikeDetails)
-        {
-            bikeDetails = null;
-
-            _logger.LogDebug($"Trying to get bike details from '{url}'");
-
-            try
-            {
-                bikeDetails = GetModel(url);
-                
-                return true;
-            }
-            catch (Exception e)
-            {
-                //webDriver.CaptureHtmlAndScreenshot($"{DateTime.Now:yyyyMMddHHmmss}_{e.GetType().FullName}_{GetType().FullName}_{MethodBase.GetCurrentMethod()?.Name}");
-                webDriver.CaptureHtmlAndScreenshot(e, GetType(), MethodBase.GetCurrentMethod());
-
-                _logger.LogError(e, $"Failed to scrape bike details from '{url}'");
-
-                return false;
-            }
-        }
-
         public void Dispose()
         {
             _webDriver.Quit();
