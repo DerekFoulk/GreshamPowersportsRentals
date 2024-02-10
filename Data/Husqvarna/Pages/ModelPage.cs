@@ -1,23 +1,16 @@
 ﻿using System.Globalization;
 using Data.Husqvarna.Models;
-using Data.Husqvarna.Pages.Shared;
+using Data.Pages;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using SeleniumExtras.PageObjects;
 
 namespace Data.Husqvarna.Pages
 {
-    public class ModelPage : Page<ModelPage>
+    public class ModelPage : BasePage<ModelPage>
     {
-        private readonly string _url;
-        private readonly string _name;
-
-        public ModelPage(ILogger logger, IWebDriver webDriver, string url, string name) : base(logger, webDriver)
+        public ModelPage(ILogger logger, IWebDriver webDriver, string url) : base(logger, webDriver, url)
         {
-            _url = url;
-            _name = name;
-
-            GoToPage();
         }
 
         [FindsBy(How = How.CssSelector, Using = ".c-variant-overview__selector-title span")]
@@ -38,16 +31,9 @@ namespace Data.Husqvarna.Pages
         [FindsBy(How = How.CssSelector, Using = ".c-variant-overview__content-description span")]
         public IWebElement OverviewContentDescription { get; set; }
 
-        public void GoToPage()
-        {
-            Logger.LogTrace($"Navigating to the model page for {_name}");
-
-            WebDriver.Navigate().GoToUrl(_url);
-        }
-
         public HusqvarnaBicycleInfo GetBicycleInfo()
         {
-            Logger.LogTrace($"Getting info for {_name} ({_url})");
+            Logger.LogDebug("Getting bicycle info");
 
             var name = Title.Text;
 

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using Data.Husqvarna.Pages.Shared;
+using Data.Pages;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
@@ -8,7 +8,7 @@ using SeleniumExtras.PageObjects;
 
 namespace Data.Specialized.Pages
 {
-    public class BikesPage : Page<BikesPage>
+    public class BikesPage : BasePage<BikesPage>
     {
         public BikesPage(ILogger logger, IWebDriver webDriver) : base(logger, webDriver)
         {
@@ -29,7 +29,7 @@ namespace Data.Specialized.Pages
             WebDriver.Navigate().GoToUrl(url);
         }
 
-        public List<string> GetBikeDetailUrlsAcrossPages(int? maxPage = null, int? minPage = null)
+        public IEnumerable<string> GetBikeDetailUrlsAcrossPages(int? maxPage = null, int? minPage = null)
         {
             Logger.LogDebug("Getting bike detail page URLs");
 

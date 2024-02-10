@@ -37,7 +37,9 @@ namespace Data.Specialized.Services
 
                 bikesPage.GoToPage(minPage ?? 1);
 
-                var urls = bikesPage.GetBikeDetailUrlsAcrossPages(maxPage, minPage).Distinct().ToList();
+                var urls = bikesPage.GetBikeDetailUrlsAcrossPages(maxPage, minPage)
+                    .Distinct()
+                    .ToList();
 
                 _logger.LogDebug($"Found {urls.Count} bike details page URLs to scrape");
 
@@ -73,11 +75,7 @@ namespace Data.Specialized.Services
         {
             _logger.LogDebug($"Getting bike details from '{url}'");
 
-            _logger.LogTrace($"Navigating to '{url}'");
-
-            _webDriver.Navigate().GoToUrl(url);
-
-            var bikeDetailsPage = new BikeDetailsPage(_logger, _webDriver);
+            var bikeDetailsPage = new BikeDetailsPage(_logger, _webDriver, url);
             var bikeDetails = bikeDetailsPage.GetBikeDetails();
 
             return bikeDetails;

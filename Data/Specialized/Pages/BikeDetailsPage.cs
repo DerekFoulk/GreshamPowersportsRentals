@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using AngleSharp.Dom;
 using Data.Extensions;
 using Data.Pages;
 using Data.Specialized.Exceptions;
@@ -17,7 +18,7 @@ namespace Data.Specialized.Pages
     {
         private List<ModelConfiguration> _modelConfigurations = new();
 
-        public BikeDetailsPage(ILogger logger, IWebDriver webDriver) : base(logger, webDriver)
+        public BikeDetailsPage(ILogger logger, IWebDriver webDriver, string url) : base(logger, webDriver, url)
         {
         }
 

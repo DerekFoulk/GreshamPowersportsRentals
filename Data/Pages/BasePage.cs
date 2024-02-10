@@ -14,9 +14,29 @@ namespace Data.Pages
             UpdatePageObject();
         }
 
+        protected BasePage(ILogger logger, IWebDriver webDriver, string url)
+        {
+            Logger = logger;
+            WebDriver = webDriver;
+            Url = url;
+
+            GoToPage();
+
+            UpdatePageObject();
+        }
+
         protected ILogger Logger { get; }
 
         protected IWebDriver WebDriver { get; }
+
+        protected string Url { get; set; }
+
+        protected void GoToPage()
+        {
+            Logger.LogTrace($"Navigating to '{Url}'");
+
+            WebDriver.Navigate().GoToUrl(Url);
+        }
 
         protected void UpdatePageObject()
         {

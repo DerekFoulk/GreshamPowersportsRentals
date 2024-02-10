@@ -31,39 +31,18 @@ namespace Data.Husqvarna.Services
 
             try
             {
-                var homePage = new HomePage(_logger, _webDriver);
+                var modelsPage = new ModelsPage(_logger, _webDriver);
 
-                List<IWebElement> modelMenuItems;
-                try
+                var urls = modelsPage.GetBikeDetailUrls()
+                    .Distinct()
+                    .ToList();
+
+                foreach (var url in urls)
                 {
-                    modelMenuItems = homePage.MainMenuElement.GetModelMenuItems();
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, "Failed to get menu items in 'Models'");
+                    _logger.LogDebug($"Getting details #{urls.IndexOf(url)} ({url})");
 
-                    throw;
-                }
+                    var bicycleInfo = GetBicycleInfo(url);
 
-                _logger.LogTrace($"Scraped '{modelMenuItems.Count}' models from the menu");
-
-                var targets = new List<(string Text, string Href)>();
-
-                foreach (var modelMenuItem in modelMenuItems)
-                {
-                    var text = modelMenuItem.Text.Trim();
-                    var href = modelMenuItem.GetAttribute("href").Trim();
-
-                    targets.Add((text, href));
-                }
-
-                foreach (var (text, href) in targets)
-                {
-                    _logger.LogTrace($"Getting details for {text} from {href}");
-
-                    var modelPage = new ModelPage(_logger, _webDriver, href, text);
-
-                    var bicycleInfo = modelPage.GetBicycleInfo();
                     bicycleInfos.Add(bicycleInfo);
                 }
             }
@@ -78,6 +57,17 @@ namespace Data.Husqvarna.Services
             }
 
             return bicycleInfos;
+        }
+
+        public HusqvarnaBicycleInfo GetBicycleInfo(string url)
+        {
+            _logger.LogDebug($"Getting bike details from '{url}'");
+
+            var modelPage = new ModelPage(_logger, _webDriver, url);
+
+            var bicycleInfo = modelPage.GetBicycleInfo();
+
+            return bicycleInfo;
         }
 
         public void Dispose()

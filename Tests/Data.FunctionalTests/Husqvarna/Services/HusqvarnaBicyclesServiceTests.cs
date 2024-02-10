@@ -18,7 +18,7 @@ namespace Data.FunctionalTests.Husqvarna.Services
         }
 
         [Fact]
-        public void GetBicycles_ReturnsExpected()
+        public void GetBicycleInfo_ReturnsExpected()
         {
             // Arrange
             var webDriverFactory = new WebDriverFactory();
@@ -30,14 +30,36 @@ namespace Data.FunctionalTests.Husqvarna.Services
             };
             mockOptionsSnapshot.Setup(x => x.Value)
                 .Returns(webDriverOptions);
-            var husqvarnaBicyclesService = new HusqvarnaBicyclesService(Logger, mockOptionsSnapshot.Object, webDriverFactory);
+            using var husqvarnaBicyclesService = new HusqvarnaBicyclesService(Logger, mockOptionsSnapshot.Object, webDriverFactory);
 
             // Act
-            var models = husqvarnaBicyclesService.GetBicycleInfos();
+            var bicycleInfo = husqvarnaBicyclesService.GetBicycleInfo("https://www.husqvarna-bicycles.com/en-us/models/offroad/hard-cross/hard-cross-hc5-2023.7902307544.html");
 
             // Assert
-            models.Should()
-                .HaveCount(8)
+            BicycleInfoAssertions(bicycleInfo);
+        }
+
+        [Fact]
+        public void GetBicycleInfos_ReturnsExpected()
+        {
+            // Arrange
+            var webDriverFactory = new WebDriverFactory();
+            var mockOptionsSnapshot = new Mock<IOptionsSnapshot<WebDriverOptions>>();
+            var webDriverOptions = new WebDriverOptions
+            {
+                Headless = false,
+                ImplicitWaitInSeconds = 3
+            };
+            mockOptionsSnapshot.Setup(x => x.Value)
+                .Returns(webDriverOptions);
+            using var husqvarnaBicyclesService = new HusqvarnaBicyclesService(Logger, mockOptionsSnapshot.Object, webDriverFactory);
+
+            // Act
+            var bicycleInfos = husqvarnaBicyclesService.GetBicycleInfos();
+
+            // Assert
+            bicycleInfos.Should()
+                .HaveCount(7)
                 .And.AllSatisfy(BicycleInfoAssertions);
         }
 
