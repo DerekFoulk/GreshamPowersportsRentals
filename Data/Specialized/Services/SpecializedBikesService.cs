@@ -15,17 +15,14 @@ namespace Data.Specialized.Services
     public class SpecializedBikesService : IDisposable
     {
         private readonly ILogger<SpecializedBikesService> _logger;
-        private readonly WebDriverOptions _webDriverOptions;
-        private readonly IWebDriverFactory _webDriverFactory;
-        private readonly IWebDriver webDriver;
+        private readonly IWebDriver _webDriver;
 
         public SpecializedBikesService(ILogger<SpecializedBikesService> logger, IOptionsSnapshot<WebDriverOptions> optionsSnapshot, IWebDriverFactory webDriverFactory)
         {
             _logger = logger;
-            _webDriverOptions = optionsSnapshot.Value;
-            _webDriverFactory = webDriverFactory;
-            
-            webDriver = _webDriverFactory.GetWebDriver(TimeSpan.FromSeconds(_webDriverOptions.ImplicitWaitInSeconds), _webDriverOptions.Headless);
+            var webDriverOptions = optionsSnapshot.Value;
+
+            _webDriver = webDriverFactory.GetWebDriver(TimeSpan.FromSeconds(webDriverOptions.ImplicitWaitInSeconds), webDriverOptions.Headless);
         }
 
         public async Task<IEnumerable<Model>> GetModelsAsync(int? maxPage = null, int? minPage = null)
@@ -36,7 +33,7 @@ namespace Data.Specialized.Services
 
             try
             {
-                var bikesPage = new BikesPage(_logger, webDriver);
+                var bikesPage = new BikesPage(_logger, _webDriver);
 
                 bikesPage.GoToPage(minPage ?? 1);
 
@@ -58,7 +55,7 @@ namespace Data.Specialized.Services
             catch (Exception e)
             {
                 if (e is WebDriverException)
-                    webDriver.CaptureHtmlAndScreenshot(e, GetType(), MethodBase.GetCurrentMethod());
+                    _webDriver.CaptureHtmlAndScreenshot(e, GetType(), MethodBase.GetCurrentMethod());
 
                 _logger.LogError(e, "Failed to scrape bikes from Specialized's website");
 
@@ -78,9 +75,9 @@ namespace Data.Specialized.Services
 
             _logger.LogTrace($"Navigating to '{url}'");
 
-            webDriver.Navigate().GoToUrl(url);
+            _webDriver.Navigate().GoToUrl(url);
 
-            var bikeDetailsPage = new BikeDetailsPage(_logger, webDriver);
+            var bikeDetailsPage = new BikeDetailsPage(_logger, _webDriver);
             var bikeDetails = bikeDetailsPage.GetBikeDetails();
 
             return bikeDetails;
@@ -124,7 +121,7 @@ namespace Data.Specialized.Services
 
         public void Dispose()
         {
-            webDriver.Quit();
+            _webDriver.Quit();
         }
     }
 }
