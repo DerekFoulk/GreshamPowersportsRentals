@@ -11,6 +11,11 @@ namespace Data.Factories
 {
     public class WebDriverFactory : IWebDriverFactory
     {
+        public IWebDriver GetWebDriver(TimeSpan implicitWait, bool headless = false)
+        {
+            return GetWebDriver<EdgeDriver>(implicitWait, headless);
+        }
+
         public IWebDriver GetWebDriver<TWebDriver>(TimeSpan implicitWait, bool headless = false) where TWebDriver : IWebDriver
         {
             IDriverConfig driverConfig;

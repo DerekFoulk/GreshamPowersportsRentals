@@ -181,10 +181,12 @@ namespace Data.Specialized.Pages
                     
                     Logger.LogWarning(message);
                 }
+                else
+                {
+                    Logger.LogTrace($"Adding '{name}' ({url}) #{pageNumber}");
 
-                Logger.LogTrace($"Adding '{name}' ({url}) #{pageNumber}");
-                
-                bikeDetailsPagesToScrape.Add(url);
+                    bikeDetailsPagesToScrape.Add(url);
+                }
             }
 
             return bikeDetailsPagesToScrape;

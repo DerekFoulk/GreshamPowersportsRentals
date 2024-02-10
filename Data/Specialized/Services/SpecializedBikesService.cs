@@ -4,28 +4,29 @@ using Data.Specialized.Models;
 using Data.Specialized.Pages;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Edge;
 using System.Reflection;
 using System.Text;
 using Data.Options;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 
 namespace Data.Specialized.Services
 {
-    public class SpecializedBikesService
+    public class SpecializedBikesService : IDisposable
     {
         private readonly ILogger<SpecializedBikesService> _logger;
         private readonly WebDriverOptions _webDriverOptions;
         private readonly IWebDriverFactory _webDriverFactory;
+        private readonly IWebDriver webDriver;
 
         public SpecializedBikesService(ILogger<SpecializedBikesService> logger, IOptionsSnapshot<WebDriverOptions> optionsSnapshot, IWebDriverFactory webDriverFactory)
         {
             _logger = logger;
             _webDriverOptions = optionsSnapshot.Value;
             _webDriverFactory = webDriverFactory;
+            
+            webDriver = _webDriverFactory.GetWebDriver(TimeSpan.FromSeconds(_webDriverOptions.ImplicitWaitInSeconds), _webDriverOptions.Headless);
         }
 
         public async Task<IEnumerable<Model>> GetModelsAsync(int? maxPage = null, int? minPage = null)
@@ -33,9 +34,6 @@ namespace Data.Specialized.Services
             _logger.LogDebug("Getting bikes from Specialized's website");
 
             var models = new List<Model>();
-
-            var webDriver = _webDriverFactory.GetWebDriver<FirefoxDriver>(
-                TimeSpan.FromSeconds(_webDriverOptions.ImplicitWaitInSeconds), _webDriverOptions.Headless);
 
             try
             {
@@ -51,9 +49,9 @@ namespace Data.Specialized.Services
                 {
                     _logger.LogDebug($"Getting bike details #{urls.IndexOf(url)} ({url})");
 
-                    var bikeDetails = GetBikeDetails(url, webDriver);
+                    var model = GetModel(url);
 
-                    models.Add(bikeDetails);
+                    models.Add(model);
                 }
 
                 _logger.LogDebug("Finished getting bike details");
@@ -67,16 +65,26 @@ namespace Data.Specialized.Services
 
                 throw;
             }
-            finally
-            {
-                webDriver.Quit();
-            }
 
             _logger.LogInformation($"Scraped {models.Count} bikes from Specialized's website");
 
             await SaveBikesAsJsonAsync(models);
 
             return models;
+        }
+
+        public Model GetModel(string url)
+        {
+            _logger.LogDebug($"Getting bike details from '{url}'");
+
+            _logger.LogTrace($"Navigating to '{url}'");
+
+            webDriver.Navigate().GoToUrl(url);
+
+            var bikeDetailsPage = new BikeDetailsPage(_logger, webDriver);
+            var bikeDetails = bikeDetailsPage.GetBikeDetails();
+
+            return bikeDetails;
         }
 
         private async Task SaveBikesAsJsonAsync(List<Model> bikes)
@@ -100,7 +108,7 @@ namespace Data.Specialized.Services
 
             try
             {
-                bikeDetails = GetBikeDetails(url, webDriver);
+                bikeDetails = GetModel(url);
                 
                 return true;
             }
@@ -115,18 +123,9 @@ namespace Data.Specialized.Services
             }
         }
 
-        private Model GetBikeDetails(string url, IWebDriver webDriver)
+        public void Dispose()
         {
-            _logger.LogDebug($"Getting bike details from '{url}'");
-            
-            _logger.LogTrace($"Navigating to '{url}'");
-
-            webDriver.Navigate().GoToUrl(url);
-
-            var bikeDetailsPage = new BikeDetailsPage(_logger, webDriver);
-            var bikeDetails = bikeDetailsPage.GetBikeDetails();
-
-            return bikeDetails;
+            webDriver.Quit();
         }
     }
 }

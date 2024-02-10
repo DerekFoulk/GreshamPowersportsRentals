@@ -26,7 +26,7 @@ namespace Data.Husqvarna.Services
         {
             _logger.LogTrace("Getting bikes from Husqvarna's website");
 
-            var webDriver = _webDriverFactory.GetWebDriver<EdgeDriver>(
+            var webDriver = _webDriverFactory.GetWebDriver(
                 TimeSpan.FromSeconds(_webDriverOptions.ImplicitWaitInSeconds), _webDriverOptions.Headless);
 
             var bicycleInfos = new List<HusqvarnaBicycleInfo>();
