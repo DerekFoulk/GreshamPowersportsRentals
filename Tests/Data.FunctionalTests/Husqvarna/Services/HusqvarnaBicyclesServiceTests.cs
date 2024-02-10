@@ -1,4 +1,5 @@
 ﻿using Data.Factories;
+using Data.Husqvarna.Models;
 using Data.Husqvarna.Services;
 using Data.Options;
 using Divergic.Logging.Xunit;
@@ -37,22 +38,26 @@ namespace Data.FunctionalTests.Husqvarna.Services
             // Assert
             models.Should()
                 .HaveCount(8)
-                .And.AllSatisfy(bicycleInfo =>
-                {
-                    bicycleInfo.Name.Should().NotBeNullOrWhiteSpace();
-                    bicycleInfo.Msrp.Should().BeGreaterThan(0);
+                .And.AllSatisfy(BicycleInfoAssertions);
+        }
 
-                    bicycleInfo.Images.LargeImage.Should()
-                        .NotBeNullOrEmpty();
+        private void BicycleInfoAssertions(HusqvarnaBicycleInfo bicycleInfo)
+        {
+            bicycleInfo.Name.Should()
+                .NotBeNullOrWhiteSpace();
+            bicycleInfo.Msrp.Should()
+                .BePositive();
 
-                    bicycleInfo.Description.Heading.Should()
-                        .NotBeNullOrWhiteSpace();
-                    bicycleInfo.Description.Text.Should()
-                        .NotBeNullOrWhiteSpace();
+            bicycleInfo.Images.LargeImage.Should()
+                .NotBeNullOrEmpty();
 
-                    bicycleInfo.Specifications.Should()
-                        .BeNull();
-                });
+            bicycleInfo.Description.Heading.Should()
+                .NotBeNullOrWhiteSpace();
+            bicycleInfo.Description.Text.Should()
+                .NotBeNullOrWhiteSpace();
+
+            bicycleInfo.Specifications.Should()
+                .BeNull();
         }
     }
 }
