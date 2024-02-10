@@ -9,7 +9,6 @@ using System.Text;
 using Data.Options;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using OpenQA.Selenium.Firefox;
 
 namespace Data.Specialized.Services
 {

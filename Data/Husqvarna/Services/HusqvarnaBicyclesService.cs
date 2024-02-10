@@ -5,7 +5,6 @@ using Data.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Edge;
 
 namespace Data.Husqvarna.Services
 {
