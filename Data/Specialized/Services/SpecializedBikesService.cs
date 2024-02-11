@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 
 namespace Data.Specialized.Services
 {
-    public class SpecializedBikesService : IDisposable
+    public class SpecializedBikesService : ISpecializedBikesService
     {
         private readonly ILogger<SpecializedBikesService> _logger;
         private readonly IWebDriver _webDriver;

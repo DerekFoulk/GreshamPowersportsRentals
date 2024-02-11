@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace BlazorApp.Shared
+namespace BlazorApp.Shared.Models
 {
-    public class Category
+    public class Manufacturer
     {
-        public Category(string name)
+        public Manufacturer(string name)
         {
             Name = name;
         }
@@ -12,7 +12,5 @@ namespace BlazorApp.Shared
         public Guid Id { get; set; }
 
         public string Name { get; set; }
-
-        public string? Image { get; set; }
     }
 }

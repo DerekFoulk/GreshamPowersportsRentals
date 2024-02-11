@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BlazorApp.Shared;
+namespace BlazorApp.Shared.Models;
 
 public class Bike
 {
@@ -20,11 +20,11 @@ public class Bike
     public Model Model { get; set; }
 
     public string Size { get; set; }
-    
+
     public string Color { get; set; }
-    
+
     public IEnumerable<string> Images { get; set; }
-    
+
     public bool IsAvailable { get; set; }
 
     public override string ToString()

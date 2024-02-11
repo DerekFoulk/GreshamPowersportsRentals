@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BlazorApp.Shared;
+namespace BlazorApp.Shared.Models;
 
 public enum BikeType
 {

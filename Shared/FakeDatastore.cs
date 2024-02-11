@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AutoBogus;
-using BlazorApp.Shared;
 using BlazorApp.Shared.Extensions;
+using BlazorApp.Shared.Models;
 
-namespace Api;
+namespace BlazorApp.Shared;
 
 public class FakeDatastore : IDatastore
 {

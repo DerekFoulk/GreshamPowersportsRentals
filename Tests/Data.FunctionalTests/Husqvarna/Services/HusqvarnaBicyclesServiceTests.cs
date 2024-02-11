@@ -22,15 +22,15 @@ namespace Data.FunctionalTests.Husqvarna.Services
         {
             // Arrange
             var webDriverFactory = new WebDriverFactory();
-            var mockOptionsSnapshot = new Mock<IOptionsSnapshot<WebDriverOptions>>();
+            var optionsSnapshotMock = new Mock<IOptionsSnapshot<WebDriverOptions>>();
             var webDriverOptions = new WebDriverOptions
             {
                 Headless = false,
                 ImplicitWaitInSeconds = 3
             };
-            mockOptionsSnapshot.Setup(x => x.Value)
+            optionsSnapshotMock.Setup(x => x.Value)
                 .Returns(webDriverOptions);
-            using var husqvarnaBicyclesService = new HusqvarnaBicyclesService(Logger, mockOptionsSnapshot.Object, webDriverFactory);
+            using var husqvarnaBicyclesService = new HusqvarnaBicyclesService(Logger, optionsSnapshotMock.Object, webDriverFactory);
 
             // Act
             var bicycleInfo = husqvarnaBicyclesService.GetBicycleInfo("https://www.husqvarna-bicycles.com/en-us/models/offroad/hard-cross/hard-cross-hc5-2023.7902307544.html");
@@ -44,15 +44,15 @@ namespace Data.FunctionalTests.Husqvarna.Services
         {
             // Arrange
             var webDriverFactory = new WebDriverFactory();
-            var mockOptionsSnapshot = new Mock<IOptionsSnapshot<WebDriverOptions>>();
+            var optionsSnapshotMock = new Mock<IOptionsSnapshot<WebDriverOptions>>();
             var webDriverOptions = new WebDriverOptions
             {
                 Headless = false,
                 ImplicitWaitInSeconds = 3
             };
-            mockOptionsSnapshot.Setup(x => x.Value)
+            optionsSnapshotMock.Setup(x => x.Value)
                 .Returns(webDriverOptions);
-            using var husqvarnaBicyclesService = new HusqvarnaBicyclesService(Logger, mockOptionsSnapshot.Object, webDriverFactory);
+            using var husqvarnaBicyclesService = new HusqvarnaBicyclesService(Logger, optionsSnapshotMock.Object, webDriverFactory);
 
             // Act
             var bicycleInfos = husqvarnaBicyclesService.GetBicycleInfos();

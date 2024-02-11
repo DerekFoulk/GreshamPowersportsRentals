@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace Data.Husqvarna.Services
 {
-    public class HusqvarnaBicyclesService : IDisposable
+    public class HusqvarnaBicyclesService : IHusqvarnaBicyclesService
     {
         private readonly ILogger<HusqvarnaBicyclesService> _logger;
         private readonly IWebDriver _webDriver;

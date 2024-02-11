@@ -1,7 +1,7 @@
-﻿using BlazorApp.Shared;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using BlazorApp.Shared.Models;
 
-namespace Api
+namespace BlazorApp.Shared
 {
     public interface IDatastore
     {

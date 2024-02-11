@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace BlazorApp.Shared
+namespace BlazorApp.Shared.Models
 {
     public class Rental
     {

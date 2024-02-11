@@ -38,16 +38,16 @@ public class SpecializedBikeServiceTests : LoggingTestsBase<SpecializedBikesServ
     {
         // Arrange
         var webDriverFactory = new WebDriverFactory();
-        var mockOptionsSnapshot = new Mock<IOptionsSnapshot<WebDriverOptions>>();
+        var optionsSnapshotMock = new Mock<IOptionsSnapshot<WebDriverOptions>>();
         var webDriverOptions = new WebDriverOptions
         {
             Headless = true,
             ImplicitWaitInSeconds = 3
         };
-        mockOptionsSnapshot.Setup(x => x.Value)
+        optionsSnapshotMock.Setup(x => x.Value)
             .Returns(webDriverOptions);
         using var specializedBikesService =
-            new SpecializedBikesService(Logger, mockOptionsSnapshot.Object, webDriverFactory);
+            new SpecializedBikesService(Logger, optionsSnapshotMock.Object, webDriverFactory);
 
         // Act
         var models = (await specializedBikesService.GetModelsAsync()).ToList();
@@ -65,16 +65,16 @@ public class SpecializedBikeServiceTests : LoggingTestsBase<SpecializedBikesServ
     {
         // Arrange
         var webDriverFactory = new WebDriverFactory();
-        var mockOptionsSnapshot = new Mock<IOptionsSnapshot<WebDriverOptions>>();
+        var optionsSnapshotMock = new Mock<IOptionsSnapshot<WebDriverOptions>>();
         var webDriverOptions = new WebDriverOptions
         {
             Headless = false,
             ImplicitWaitInSeconds = 3
         };
-        mockOptionsSnapshot.Setup(x => x.Value)
+        optionsSnapshotMock.Setup(x => x.Value)
             .Returns(webDriverOptions);
         using var specializedBikesService =
-            new SpecializedBikesService(Logger, mockOptionsSnapshot.Object, webDriverFactory);
+            new SpecializedBikesService(Logger, optionsSnapshotMock.Object, webDriverFactory);
 
         // Act
         var model = specializedBikesService.GetModel(url);

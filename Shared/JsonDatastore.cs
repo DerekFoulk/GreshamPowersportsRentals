@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using AutoBogus;
-using BlazorApp.Shared;
+using AutoMapper;
 using BlazorApp.Shared.Extensions;
-using Data.Specialized.Models;
+using BlazorApp.Shared.Models;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
-namespace Api
+namespace BlazorApp.Shared
 {
     public class JsonDatastore : IDatastore
     {
         private readonly ILogger<JsonDatastore> _logger;
+        private readonly IMapper _mapper;
         private readonly Stopwatch _stopwatch = new();
         
         public List<Bike> Bikes { get; set; }
@@ -23,9 +22,10 @@ namespace Api
         public List<Model> Models { get; set; }
         public List<Rental> Rentals { get; set; }
 
-        public JsonDatastore(ILogger<JsonDatastore> logger)
+        public JsonDatastore(ILogger<JsonDatastore> logger, IMapper mapper)
         {
             _logger = logger;
+            _mapper = mapper;
 
             _stopwatch.Start();
 
@@ -79,119 +79,9 @@ namespace Api
 
         private List<Model> GetModelsFromJsonFiles()
         {
-            var specializedModels = GetSpecializedModels();
-
-            return specializedModels;
-        }
-
-        private List<Model> GetSpecializedModels()
-        {
-            using var streamReader = File.OpenText("Specialized.json");
-            var serializer = new JsonSerializer();
-            var specializedModels = serializer.Deserialize(streamReader, typeof(List<SpecializedModel>)) as List<SpecializedModel>;
-
-            if (specializedModels is null || !specializedModels.Any())
-                throw new NullReferenceException($"'{nameof(specializedModels)}' cannot be null");
-
             var models = new List<Model>();
 
-            foreach (var specializedModel in specializedModels)
-            {
-                // TODO: Remove when scraper is working properly
-                if (specializedModel.Name.Contains("Frameset", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                var model = ConvertToModel(specializedModel);
-
-                models.Add(model);
-            }
-
             return models;
-        }
-
-        private Model ConvertToModel(SpecializedModel specializedModel)
-        {
-            var id = Guid.NewGuid();
-            var manufacturer =
-                Manufacturers.Single(x => x.Name.Equals("Specialized", StringComparison.OrdinalIgnoreCase));
-            var name = specializedModel.Name;
-            var category = GetCategory(specializedModel);
-            var bikeType = Enum.GetValues<BikeType>().Single(x => category.Name.Contains(x.GetDisplayName()));
-            var description = specializedModel.Description;
-
-            var averageMsrp = specializedModel.Configurations.Select(x => x.Pricing.Msrp).Average();
-            var pricePerHour = GetPricePerHour(averageMsrp);
-            var pricePerDay = GetPricePerDay(pricePerHour);
-            var pricePerWeek = GetPricePerWeek(pricePerDay);
-
-            var bikes = new List<Bike>();
-
-            var model = new Model(id, manufacturer, name, bikeType, category, description, pricePerHour, pricePerDay, pricePerWeek, bikes);
-
-            var configurations = specializedModel.Configurations;
-
-            foreach (var configuration in configurations)
-            {
-                var bike = ConvertToBike(configuration, model);
-
-                bikes.Add(bike);
-            }
-
-            return model;
-        }
-
-        private Bike ConvertToBike(ModelConfiguration configuration, Model model)
-        {
-            var bike = new Bike(model, configuration.Size, configuration.Color, configuration.Images)
-            {
-                Id = Guid.NewGuid(),
-                IsAvailable = true
-            };
-
-            return bike;
-        }
-
-        private decimal GetPricePerWeek(decimal pricePerDay)
-        {
-            var pricePerWeek = pricePerDay * 7;
-
-            pricePerWeek *= 0.75M;
-
-            pricePerWeek = Math.Round(pricePerWeek / 5) * 5;
-
-            return pricePerWeek;
-        }
-
-        private decimal GetPricePerDay(decimal pricePerHour)
-        {
-            var pricePerDay = pricePerHour * 24;
-
-            pricePerDay = Math.Round(pricePerDay / 5) * 5;
-
-            return pricePerDay;
-        }
-
-        private decimal GetPricePerHour(decimal averageMsrp)
-        {
-            var totalHoursInAYear = (decimal)TimeSpan.FromDays(90).TotalHours;
-            var pricePerHour = averageMsrp / totalHoursInAYear;
-
-            return pricePerHour;
-        }
-
-        private Category GetCategory(SpecializedModel specializedModel)
-        {
-            foreach (var category in Categories)
-            {
-                if (specializedModel.Breadcrumbs.Contains(category.Name, StringComparer.OrdinalIgnoreCase))
-                {
-                    return category;
-                }
-            }
-
-            return Categories.Single(x => x.Name.Equals("Demo Bikes", StringComparison.OrdinalIgnoreCase));
-
-            //throw new InvalidOperationException($"Cannot determine category for '{specializedModel}' from '{string.Join(", ", specializedModel.Breadcrumbs)}'");
         }
 
         private string GetCategoryImage(Category category)

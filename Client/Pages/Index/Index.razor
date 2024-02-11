@@ -135,6 +135,6 @@
         if (Rental is null)
             throw new NullReferenceException($"{nameof(Rental)} ({typeof(Rental).FullName}) cannot be null");
 
-        Logger.LogInformation($"{nameof(BlazorApp.Shared.Rental)} #{Rental.Id} ({Rental.StartDate}-{Rental.EndDate}) submitted @ {DateTime.Now}");
+        Logger.LogInformation($"{nameof(BlazorApp.Shared.Models.Rental)} #{Rental.Id} ({Rental.StartDate}-{Rental.EndDate}) submitted @ {DateTime.Now}");
     }
 }
